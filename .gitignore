@@ -1,0 +1,41 @@
+# ---------- Python / backend ----------
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+env/
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# ---------- Node / Angular / frontend ----------
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ---------- Entorno y credenciales ----------
+.env
+.env.*
+*.local
+
+# ---------- Editor ----------
+.vscode/
+.idea/
+*.swp
+
+# ---------- Sistema operativo ----------
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ---------- Temporales de Office ----------
+~$*.docx
+~$*.xlsx
+~$*.pptx

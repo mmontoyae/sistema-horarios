@@ -1,0 +1,43 @@
+<h2>Carga inicial de datos</h2>
+
+<div class="tarjeta">
+  <p>Seleccione el archivo <b>insumos_horarios.xlsx</b> con las hojas: docentes, espacios, asignaturas, paralelos, distributivo y disponibilidad_docente.</p>
+  <input type="file" accept=".xlsx,.xls,.csv" (change)="seleccionarArchivo($event)">
+  <p *ngIf="nombreArchivo">Archivo cargado: <b>{{ nombreArchivo }}</b></p>
+  <div class="mensaje-error" *ngIf="mensajeError">{{ mensajeError }}</div>
+  <button *ngIf="hojas.length > 0" (click)="enviarTodo()">Enviar todo al backend</button>
+</div>
+
+<div class="tarjeta" *ngFor="let hoja of hojas">
+  <h3>Hoja: {{ hoja.nombre }} ({{ hoja.filas.length }} registros)</h3>
+
+  <div class="mensaje-error" *ngIf="hoja.errores.length > 0">
+    <div *ngFor="let e of hoja.errores">{{ e }}</div>
+  </div>
+
+  <div class="mensaje-ok" *ngIf="hoja.resumen">
+    Se procesaron {{ hoja.resumen.procesados }} registros en el backend.
+    <span *ngIf="hoja.resumen.errores.length > 0"> Errores: {{ hoja.resumen.errores.join(', ') }}</span>
+  </div>
+
+  <!-- vista previa: primeras 5 filas -->
+  <div style="overflow-x: auto;">
+    <table>
+      <thead>
+        <tr>
+          <th *ngFor="let col of columnas(hoja)">{{ col }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let fila of hoja.filas.slice(0, 5)">
+          <td *ngFor="let col of columnas(hoja)">{{ fila[col] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p *ngIf="hoja.filas.length > 5"><i>Mostrando 5 de {{ hoja.filas.length }} filas</i></p>
+
+  <button (click)="enviarHoja(hoja)" [disabled]="hoja.errores.length > 0 || hoja.enviando">
+    {{ hoja.enviando ? 'Enviando...' : 'Enviar esta hoja' }}
+  </button>
+</div>

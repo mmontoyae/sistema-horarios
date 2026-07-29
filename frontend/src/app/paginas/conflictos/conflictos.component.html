@@ -1,0 +1,53 @@
+<h2>Horario semanal y conflictos</h2>
+
+<p *ngIf="cargando">Cargando horario...</p>
+
+<div class="tarjeta" *ngIf="!cargando">
+  <h3>Matriz semanal (bloques confirmados)</h3>
+  <div style="overflow-x: auto;">
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 70px;">Hora</th>
+          <th *ngFor="let dia of dias">{{ dia }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let hora of horas">
+          <td><b>{{ hora }}</b></td>
+          <td *ngFor="let dia of dias">
+            <div *ngFor="let b of bloquesEn(dia, hora)"
+                 class="celda-bloque"
+                 [class.celda-conflicto]="tieneConflicto(b)">
+              {{ b.asignatura_id }} / {{ b.paralelo_id }}<br>
+              {{ b.docente_id }} - {{ b.espacio_id }}<br>
+              {{ b.hora_inicio }} a {{ b.hora_fin }}
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p *ngIf="horario.length === 0"><i>Todavia no hay bloques confirmados en el horario.</i></p>
+</div>
+
+<div class="tarjeta">
+  <h3>Conflictos detectados en la sesion ({{ conflictos.length }})</h3>
+  <table *ngIf="conflictos.length > 0">
+    <thead>
+      <tr>
+        <th>Codigo</th>
+        <th>Detalle</th>
+        <th>Bloque</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of conflictos">
+        <td><b>{{ c.codigo }}</b></td>
+        <td>{{ c.detalle }}</td>
+        <td>{{ c.bloque }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <p *ngIf="conflictos.length === 0"><i>No se han detectado conflictos.</i></p>
+</div>
