@@ -1,10 +1,14 @@
 <section class="portada">
 
-  <!-- fondo 3D -->
-  <div class="fondo-3d">
+  <!-- fondo estatico: se ve de inmediato -->
+  <div class="fondo-imagen"></div>
+
+  <!-- escena 3D: solo en equipos que la mueven con soltura -->
+  <div class="fondo-3d" *ngIf="mostrar3d" [class.visible]="escenaLista">
     <spline-viewer
       url="https://prod.spline.design/Slk6b8kz3LRlKiyk/scene.splinecode"
-      loading-anim-type="none">
+      loading-anim-type="none"
+      (load)="alCargarEscena()">
     </spline-viewer>
   </div>
 

@@ -7,10 +7,22 @@
   overflow: hidden;
 }
 
+.fondo-imagen {
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/fondo-portada.webp');
+  background-size: cover;
+  background-position: center;
+}
+
 .fondo-3d {
   position: absolute;
   inset: 0;
+  opacity: 0;
+  transition: opacity 0.8s ease-in;
 }
+
+.fondo-3d.visible { opacity: 1; }
 
 .fondo-3d spline-viewer {
   width: 100%;
