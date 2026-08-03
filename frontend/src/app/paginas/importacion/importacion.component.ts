@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ExcelService } from '../../servicios/excel.service';
 import { ApiService, ResumenImportacion } from '../../servicios/api.service';
+import { DATOS_EJEMPLO } from '../../servicios/datos-ejemplo';
 
 interface EstadoHoja {
   nombre: string;
@@ -9,19 +10,25 @@ interface EstadoHoja {
   errores: string[];
   resumen?: ResumenImportacion;
   enviando: boolean;
+  abierta: boolean;
 }
 
 @Component({
   selector: 'app-importacion',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './importacion.component.html'
+  templateUrl: './importacion.component.html',
+  styleUrls: ['./importacion.component.css']
 })
 export class ImportacionComponent {
 
   hojas: EstadoHoja[] = [];
   nombreArchivo = '';
   mensajeError = '';
+  arrastrando = false;
+  enviandoTodo = false;
+
+  private contadorArrastre = 0;
 
   // hoja del excel -> endpoint del backend y columnas obligatorias
   configuracion: { [hoja: string]: { endpoint: string; columnas: string[] } } = {
@@ -51,16 +58,92 @@ export class ImportacionComponent {
     }
   };
 
-  // orden correcto de envio por las claves foraneas
+  // orden de envio por las claves foraneas
   ordenEnvio = ['docentes', 'espacios', 'asignaturas', 'paralelos', 'distributivo', 'disponibilidad_docente'];
 
   constructor(private excel: ExcelService, private api: ApiService) {}
 
-  async seleccionarArchivo(evento: Event) {
-    const input = evento.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
+  get modoDemo(): boolean {
+    return this.api.modoDemo;
+  }
 
-    const archivo = input.files[0];
+  /** Carga el juego de datos de ejemplo sin necesidad del archivo Excel. */
+  usarDatosEjemplo() {
+    this.mensajeError = '';
+    this.nombreArchivo = 'insumos_horarios.xlsx (datos de ejemplo)';
+    this.hojas = this.ordenEnvio
+      .filter(nombre => DATOS_EJEMPLO[nombre])
+      .map((nombre, indice) => ({
+        nombre,
+        filas: DATOS_EJEMPLO[nombre],
+        errores: [],
+        enviando: false,
+        abierta: indice === 0
+      }));
+  }
+
+  // ---------- arrastrar y soltar ----------
+
+  @HostListener('window:dragenter', ['$event'])
+  alEntrarArrastre(evento: DragEvent) {
+    if (!this.tieneArchivos(evento)) return;
+    evento.preventDefault();
+    this.contadorArrastre++;
+    this.arrastrando = true;
+  }
+
+  @HostListener('window:dragover', ['$event'])
+  alArrastrarEncima(evento: DragEvent) {
+    if (!this.tieneArchivos(evento)) return;
+    evento.preventDefault();
+  }
+
+  @HostListener('window:dragleave', ['$event'])
+  alSalirArrastre(evento: DragEvent) {
+    evento.preventDefault();
+    this.contadorArrastre--;
+    if (this.contadorArrastre <= 0) {
+      this.contadorArrastre = 0;
+      this.arrastrando = false;
+    }
+  }
+
+  @HostListener('window:drop', ['$event'])
+  alSoltar(evento: DragEvent) {
+    evento.preventDefault();
+    this.contadorArrastre = 0;
+    this.arrastrando = false;
+
+    const archivos = evento.dataTransfer?.files;
+    if (archivos && archivos.length > 0) {
+      this.procesarArchivo(archivos[0]);
+    }
+  }
+
+  private tieneArchivos(evento: DragEvent): boolean {
+    return Array.from(evento.dataTransfer?.types ?? []).includes('Files');
+  }
+
+  // ---------- seleccion manual ----------
+
+  seleccionarArchivo(evento: Event) {
+    const input = evento.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.procesarArchivo(input.files[0]);
+    }
+  }
+
+  // ---------- lectura del archivo ----------
+
+  async procesarArchivo(archivo: File) {
+    const extension = archivo.name.split('.').pop()?.toLowerCase() ?? '';
+    if (!['xlsx', 'xls', 'csv'].includes(extension)) {
+      this.mensajeError = `El archivo "${archivo.name}" no es un Excel o CSV valido.`;
+      this.hojas = [];
+      this.nombreArchivo = '';
+      return;
+    }
+
     this.nombreArchivo = archivo.name;
     this.mensajeError = '';
     this.hojas = [];
@@ -70,46 +153,75 @@ export class ImportacionComponent {
 
       this.hojas = this.ordenEnvio
         .filter(nombre => contenido[nombre])
-        .map(nombre => ({
+        .map((nombre, indice) => ({
           nombre,
           filas: contenido[nombre],
           errores: this.excel.validarColumnas(contenido[nombre], this.configuracion[nombre].columnas),
-          enviando: false
+          enviando: false,
+          abierta: indice === 0
         }));
 
       if (this.hojas.length === 0) {
-        this.mensajeError = 'El archivo no contiene ninguna de las hojas esperadas (docentes, espacios, asignaturas, paralelos, distributivo, disponibilidad_docente)';
+        this.mensajeError = 'El archivo no contiene ninguna de las hojas esperadas: docentes, espacios, asignaturas, paralelos, distributivo o disponibilidad_docente.';
       }
     } catch (error) {
       this.mensajeError = 'No se pudo leer el archivo: ' + error;
     }
   }
 
+  // ---------- utilidades de vista ----------
+
   columnas(hoja: EstadoHoja): string[] {
     return hoja.filas.length > 0 ? Object.keys(hoja.filas[0]) : [];
   }
 
+  alternar(hoja: EstadoHoja) {
+    hoja.abierta = !hoja.abierta;
+  }
+
+  get totalRegistros(): number {
+    return this.hojas.reduce((suma, h) => suma + h.filas.length, 0);
+  }
+
+  get hojasValidas(): number {
+    return this.hojas.filter(h => h.errores.length === 0).length;
+  }
+
+  get todasEnviadas(): boolean {
+    return this.hojas.length > 0 && this.hojas.every(h => h.resumen);
+  }
+
+  limpiar() {
+    this.hojas = [];
+    this.nombreArchivo = '';
+    this.mensajeError = '';
+  }
+
+  // ---------- envio al backend ----------
+
   enviarHoja(hoja: EstadoHoja) {
     hoja.enviando = true;
-    const endpoint = this.configuracion[hoja.nombre].endpoint;
-
-    this.api.importar(endpoint, hoja.filas).subscribe({
+    this.api.importar(this.configuracion[hoja.nombre].endpoint, hoja.filas).subscribe({
       next: resumen => {
         hoja.resumen = resumen;
         hoja.enviando = false;
       },
       error: err => {
-        hoja.errores = ['Error del servidor: ' + (err.error?.detail ? JSON.stringify(err.error.detail) : err.message)];
+        hoja.errores = [this.textoError(err)];
         hoja.enviando = false;
       }
     });
   }
 
   enviarTodo() {
-    // se envian en orden para respetar las dependencias entre tablas
     const pendientes = this.hojas.filter(h => h.errores.length === 0);
+    this.enviandoTodo = true;
+
     const enviarSiguiente = (indice: number) => {
-      if (indice >= pendientes.length) return;
+      if (indice >= pendientes.length) {
+        this.enviandoTodo = false;
+        return;
+      }
       const hoja = pendientes[indice];
       hoja.enviando = true;
       this.api.importar(this.configuracion[hoja.nombre].endpoint, hoja.filas).subscribe({
@@ -119,11 +231,20 @@ export class ImportacionComponent {
           enviarSiguiente(indice + 1);
         },
         error: err => {
-          hoja.errores = ['Error del servidor: ' + (err.error?.detail ? JSON.stringify(err.error.detail) : err.message)];
+          hoja.errores = [this.textoError(err)];
           hoja.enviando = false;
+          this.enviandoTodo = false;
         }
       });
     };
+
     enviarSiguiente(0);
+  }
+
+  private textoError(err: any): string {
+    if (err.status === 0) {
+      return 'No se pudo contactar al backend. Verifique que el servidor este disponible.';
+    }
+    return 'Error del servidor: ' + (err.error?.detail ? JSON.stringify(err.error.detail) : err.message);
   }
 }

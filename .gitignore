@@ -23,7 +23,9 @@ pnpm-lock.yaml
 # ---------- Entorno y credenciales ----------
 .env
 .env.*
+!.env.ejemplo
 *.local
+*.pem
 
 # ---------- Editor ----------
 .vscode/

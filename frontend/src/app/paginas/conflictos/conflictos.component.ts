@@ -7,20 +7,7 @@ import { ApiService, Conflicto } from '../../servicios/api.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './conflictos.component.html',
-  styles: [`
-    .celda-bloque {
-      background: #d7e8f7;
-      border-left: 4px solid #1b3a5c;
-      padding: 4px 6px;
-      margin-bottom: 4px;
-      border-radius: 3px;
-      font-size: 12px;
-    }
-    .celda-conflicto {
-      background: #fdecea;
-      border-left: 4px solid #d93025;
-    }
-  `]
+  styleUrls: ['./conflictos.component.css']
 })
 export class ConflictosComponent implements OnInit {
 
@@ -31,6 +18,7 @@ export class ConflictosComponent implements OnInit {
   horario: any[] = [];
   conflictos: Conflicto[] = [];
   cargando = true;
+  mensajeError = '';
 
   constructor(private api: ApiService) {}
 
@@ -40,11 +28,15 @@ export class ConflictosComponent implements OnInit {
         this.horario = datos;
         this.cargando = false;
       },
-      error: () => this.cargando = false
+      error: () => {
+        this.mensajeError = 'No se pudo obtener el horario. Verifique que el backend este disponible.';
+        this.cargando = false;
+      }
     });
 
     this.api.obtenerConflictos().subscribe({
-      next: datos => this.conflictos = datos
+      next: datos => this.conflictos = datos,
+      error: () => {}
     });
   }
 
@@ -63,6 +55,19 @@ export class ConflictosComponent implements OnInit {
   tieneConflicto(bloque: any): boolean {
     const texto = `${bloque.asignatura_id}/${bloque.paralelo_id} ${bloque.dia_semana}`;
     return this.conflictos.some(c => c.bloque.startsWith(texto));
+  }
+
+  /** true cuando el bloque empieza en esa franja (para no repetir el detalle) */
+  esInicio(bloque: any, hora: string): boolean {
+    return bloque.hora_inicio === hora;
+  }
+
+  get totalBloques(): number {
+    return this.horario.length;
+  }
+
+  get codigosDistintos(): number {
+    return new Set(this.conflictos.map(c => c.codigo)).size;
   }
 
   private aMinutos(hora: string): number {

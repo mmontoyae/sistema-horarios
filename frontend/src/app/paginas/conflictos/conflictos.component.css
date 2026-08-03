@@ -1,0 +1,106 @@
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.indicador {
+  padding: 18px 20px;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background: hsl(var(--background));
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.indicador-valor {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: hsl(var(--primary));
+  line-height: 1;
+}
+
+.indicador-valor.alerta { color: hsl(var(--destructive)); }
+
+.indicador-texto {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ---------- matriz ---------- */
+
+.matriz { table-layout: fixed; min-width: 900px; }
+
+.matriz th, .matriz td {
+  border-right: 1px solid hsl(var(--border));
+  vertical-align: top;
+}
+
+.matriz th:last-child, .matriz td:last-child { border-right: none; }
+
+.col-hora {
+  width: 74px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  background: hsl(var(--muted) / 0.4);
+  text-align: center;
+}
+
+.celda {
+  height: 54px;
+  padding: 5px;
+}
+
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 9px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  border-left: 3px solid hsl(var(--primary));
+  background: hsl(var(--primary) / 0.12);
+  transition: background 0.2s ease, transform 0.15s ease;
+  cursor: default;
+}
+
+.bloque:hover {
+  background: hsl(var(--primary) / 0.2);
+  transform: translateX(1px);
+}
+
+.bloque-conflicto {
+  border-left-color: hsl(var(--destructive));
+  background: hsl(var(--destructive) / 0.14);
+  animation: pulso-borde 2s ease-in-out infinite;
+}
+
+.bloque-conflicto:hover { background: hsl(var(--destructive) / 0.22); }
+
+.bloque-continuacion { opacity: 0.55; }
+
+.bloque-codigo {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  white-space: nowrap;
+}
+
+.bloque-detalle {
+  font-size: 0.63rem;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+
+.bloque-horas {
+  font-size: 0.6rem;
+  color: hsl(var(--primary));
+  font-weight: 500;
+}
+
+.bloque-conflicto .bloque-horas { color: hsl(var(--destructive)); }

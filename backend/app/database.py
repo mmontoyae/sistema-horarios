@@ -1,15 +1,27 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
-# conexion a SQL Server local (autenticacion de Windows)
-# si se usa usuario y clave: mssql+pyodbc://usuario:clave@localhost/horarios_upse?driver=...
-SERVIDOR = "localhost"
-BASE = "horarios_upse"
-DRIVER = "ODBC Driver 17 for SQL Server"
+# ------------------------------------------------------------------
+# Conexion a SQL Server.
+#
+# Local: usa autenticacion de Windows contra la instancia de la maquina.
+# Nube:  se define la variable de entorno DATABASE_URL con la cadena
+#        completa de Azure SQL, por ejemplo:
+#        mssql+pyodbc://usuario:clave@servidor.database.windows.net/horarios_upse
+#            ?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes
+# ------------------------------------------------------------------
 
-URL = f"mssql+pyodbc://@{SERVIDOR}/{BASE}?driver={DRIVER.replace(' ', '+')}&trusted_connection=yes"
+SERVIDOR = os.getenv("DB_SERVIDOR", "localhost")
+BASE = os.getenv("DB_NOMBRE", "horarios_upse")
+DRIVER = os.getenv("DB_DRIVER", "ODBC Driver 17 for SQL Server")
 
-engine = create_engine(URL, echo=False)
+URL = os.getenv("DATABASE_URL") or (
+    f"mssql+pyodbc://@{SERVIDOR}/{BASE}"
+    f"?driver={DRIVER.replace(' ', '+')}&trusted_connection=yes"
+)
+
+engine = create_engine(URL, echo=False, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False)
 
 

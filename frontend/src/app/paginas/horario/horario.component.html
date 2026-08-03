@@ -1,120 +1,140 @@
-<h2>Propuesta de horario</h2>
+<main class="vista">
+  <header class="encabezado animar-subida" style="animation-delay: 0.05s">
+    <h2 class="titulo-vista">Propuesta de <span class="acento">horario</span></h2>
+    <p class="bajada-vista">
+      Arma un bloque de clase y validalo contra las reglas del dominio. Si no presenta
+      conflictos puedes confirmarlo para que quede registrado en el horario semanal.
+    </p>
+  </header>
 
-<div class="mensaje-error" *ngIf="mensajeError">{{ mensajeError }}</div>
+  <div class="mensaje-error" *ngIf="mensajeError">{{ mensajeError }}</div>
 
-<div class="tarjeta" *ngIf="catalogos">
-  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
-
-    <div>
-      <label>Asignatura</label>
-      <select [(ngModel)]="propuesta.asignatura_id">
-        <option value="">-- seleccione --</option>
-        <option *ngFor="let a of catalogos.asignaturas" [value]="a.asignatura_id">
-          {{ a.asignatura_id }} - {{ a.nombre_asignatura }}
-        </option>
-      </select>
-    </div>
-
-    <div>
-      <label>Paralelo</label>
-      <select [(ngModel)]="propuesta.paralelo_id">
-        <option value="">-- seleccione --</option>
-        <option *ngFor="let p of paralelosFiltrados" [value]="p.paralelo_id">
-          {{ p.paralelo_id }} ({{ p.numero_estudiantes }} est.)
-        </option>
-      </select>
-    </div>
-
-    <div>
-      <label>Docente</label>
-      <select [(ngModel)]="propuesta.docente_id">
-        <option value="">-- seleccione --</option>
-        <option *ngFor="let d of catalogos.docentes" [value]="d.docente_id">
-          {{ d.docente_id }} - {{ d.nombres }} {{ d.apellidos }}
-        </option>
-      </select>
-    </div>
-
-    <div>
-      <label>Espacio fisico</label>
-      <select [(ngModel)]="propuesta.espacio_id">
-        <option value="">-- seleccione --</option>
-        <option *ngFor="let e of catalogos.espacios" [value]="e.espacio_id">
-          {{ e.espacio_id }} ({{ e.tipo_espacio }}, cap. {{ e.capacidad }})
-        </option>
-      </select>
-    </div>
-
-    <div>
-      <label>Dia</label>
-      <select [(ngModel)]="propuesta.dia_semana">
-        <option *ngFor="let d of dias" [value]="d">{{ d }}</option>
-      </select>
-    </div>
-
-    <div>
-      <label>Hora inicio</label>
-      <select [(ngModel)]="propuesta.hora_inicio">
-        <option *ngFor="let h of horas" [value]="h">{{ h }}</option>
-      </select>
-    </div>
-
-    <div>
-      <label>Hora fin</label>
-      <select [(ngModel)]="propuesta.hora_fin">
-        <option *ngFor="let h of horas" [value]="h">{{ h }}</option>
-      </select>
-    </div>
-
-    <div>
-      <label>Modalidad</label>
-      <select [(ngModel)]="propuesta.modalidad">
-        <option *ngFor="let m of modalidades" [value]="m">{{ m }}</option>
-      </select>
-    </div>
+  <div class="mensaje-error" *ngIf="sinDatos">
+    Todavia no hay datos cargados. Importa primero el archivo de insumos.
   </div>
 
-  <div style="margin-top: 14px;">
-    <label>
-      <input type="checkbox" [(ngModel)]="propuesta.confirmar" style="width: auto;">
-      Confirmar el bloque si la validacion es correcta (se guarda en el horario)
-    </label>
-  </div>
+  <section class="tarjeta animar-subida" style="animation-delay: 0.12s" *ngIf="catalogos">
+    <h3 class="tarjeta-titulo">Datos del bloque</h3>
 
-  <div style="margin-top: 14px;">
-    <button (click)="validar()"
-            [disabled]="enviando || !propuesta.asignatura_id || !propuesta.paralelo_id || !propuesta.docente_id || !propuesta.espacio_id">
-      {{ enviando ? 'Validando...' : 'Validar propuesta' }}
-    </button>
-  </div>
-</div>
+    <div class="rejilla">
+      <div class="campo">
+        <label class="etiqueta">Asignatura</label>
+        <select [(ngModel)]="propuesta.asignatura_id">
+          <option value="">Seleccione</option>
+          <option *ngFor="let a of catalogos.asignaturas" [value]="a.asignatura_id">
+            {{ a.asignatura_id }} · {{ a.nombre_asignatura }}
+          </option>
+        </select>
+      </div>
 
-<!-- resultado de la validacion -->
-<div *ngIf="resultado">
-  <div class="mensaje-ok" *ngIf="resultado.estado === 'VALIDO'">
-    La propuesta es valida, no se detectaron conflictos.
-  </div>
+      <div class="campo">
+        <label class="etiqueta">Paralelo</label>
+        <select [(ngModel)]="propuesta.paralelo_id">
+          <option value="">Seleccione</option>
+          <option *ngFor="let p of paralelosFiltrados" [value]="p.paralelo_id">
+            {{ p.paralelo_id }} · {{ p.numero_estudiantes }} est.
+          </option>
+        </select>
+      </div>
 
-  <div class="mensaje-error" *ngIf="resultado.estado === 'INVALIDO'">
-    Propuesta invalida: se detectaron {{ resultado.total_conflictos }} conflictos.
-  </div>
+      <div class="campo">
+        <label class="etiqueta">Docente</label>
+        <select [(ngModel)]="propuesta.docente_id">
+          <option value="">Seleccione</option>
+          <option *ngFor="let d of catalogos.docentes" [value]="d.docente_id">
+            {{ d.docente_id }} · {{ d.nombres }} {{ d.apellidos }}
+          </option>
+        </select>
+      </div>
 
-  <div class="tarjeta" *ngIf="resultado.conflictos.length > 0">
-    <table>
-      <thead>
-        <tr>
-          <th>Codigo</th>
-          <th>Detalle</th>
-          <th>Bloque afectado</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let c of resultado.conflictos">
-          <td><b>{{ c.codigo }}</b></td>
-          <td>{{ c.detalle }}</td>
-          <td>{{ c.bloque }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
+      <div class="campo">
+        <label class="etiqueta">Espacio fisico</label>
+        <select [(ngModel)]="propuesta.espacio_id">
+          <option value="">Seleccione</option>
+          <option *ngFor="let e of catalogos.espacios" [value]="e.espacio_id">
+            {{ e.espacio_id }} · {{ e.tipo_espacio }} · cap. {{ e.capacidad }}
+          </option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label class="etiqueta">Dia</label>
+        <select [(ngModel)]="propuesta.dia_semana">
+          <option *ngFor="let d of dias" [value]="d">{{ d }}</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label class="etiqueta">Hora inicio</label>
+        <select [(ngModel)]="propuesta.hora_inicio">
+          <option *ngFor="let h of horas" [value]="h">{{ h }}</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label class="etiqueta">Hora fin</label>
+        <select [(ngModel)]="propuesta.hora_fin">
+          <option *ngFor="let h of horas" [value]="h">{{ h }}</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label class="etiqueta">Modalidad</label>
+        <select [(ngModel)]="propuesta.modalidad">
+          <option *ngFor="let m of modalidades" [value]="m">{{ m }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="pie-formulario">
+      <label class="casilla">
+        <input type="checkbox" [(ngModel)]="propuesta.confirmar">
+        <span>Confirmar el bloque si la validacion es correcta</span>
+      </label>
+
+      <button (click)="validar()" [disabled]="enviando || !formularioCompleto">
+        {{ enviando ? 'Validando...' : 'Validar propuesta' }}
+      </button>
+    </div>
+  </section>
+
+  <!-- resultado -->
+  <section *ngIf="resultado" class="animar-subida">
+    <div class="veredicto" [class.veredicto-ok]="resultado.estado === 'VALIDO'"
+                           [class.veredicto-error]="resultado.estado === 'INVALIDO'">
+      <div class="veredicto-marca">{{ resultado.estado === 'VALIDO' ? '✓' : '!' }}</div>
+      <div>
+        <p class="veredicto-titulo">
+          {{ resultado.estado === 'VALIDO' ? 'Propuesta valida' : 'Propuesta invalida' }}
+        </p>
+        <p class="veredicto-texto">
+          {{ resultado.estado === 'VALIDO'
+              ? 'No se detectaron conflictos con las reglas del dominio.'
+              : 'Se detectaron ' + resultado.total_conflictos + ' conflictos que impiden registrar el bloque.' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="tarjeta" *ngIf="resultado.conflictos.length > 0">
+      <h3 class="tarjeta-titulo">Detalle de conflictos</h3>
+      <div class="contenedor-tabla">
+        <table>
+          <thead>
+            <tr>
+              <th>Codigo</th>
+              <th>Detalle</th>
+              <th>Bloque afectado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of resultado.conflictos">
+              <td><span class="insignia insignia-error">{{ c.codigo }}</span></td>
+              <td>{{ c.detalle }}</td>
+              <td class="texto-tenue">{{ c.bloque }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>

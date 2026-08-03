@@ -1,43 +1,146 @@
-<h2>Carga inicial de datos</h2>
+<!-- capa que aparece al arrastrar un archivo sobre la ventana -->
+<div class="capa-arrastre" *ngIf="arrastrando">
+  <div class="capa-caja">
+    <div class="capa-icono">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 16V4m0 0L7 9m5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <p class="capa-titulo">Suelta el archivo aqui</p>
+    <p class="capa-texto">Formatos aceptados: .xlsx, .xls, .csv</p>
+  </div>
+</div>
 
-<div class="tarjeta">
-  <p>Seleccione el archivo <b>insumos_horarios.xlsx</b> con las hojas: docentes, espacios, asignaturas, paralelos, distributivo y disponibilidad_docente.</p>
-  <input type="file" accept=".xlsx,.xls,.csv" (change)="seleccionarArchivo($event)">
-  <p *ngIf="nombreArchivo">Archivo cargado: <b>{{ nombreArchivo }}</b></p>
+<main class="vista">
+  <header class="encabezado animar-subida" style="animation-delay: 0.05s">
+    <h2 class="titulo-vista">Carga <span class="acento">inicial</span></h2>
+    <p class="bajada-vista">
+      Arrastra el archivo <strong>insumos_horarios.xlsx</strong> a cualquier parte de la pantalla
+      o seleccionalo manualmente. El sistema lee las hojas, valida las columnas obligatorias y
+      muestra una vista previa antes de enviarlas al servidor.
+    </p>
+  </header>
+
+  <!-- zona de carga -->
+  <section
+    class="zona"
+    [class.zona-activa]="arrastrando"
+    [class.zona-cargada]="hojas.length > 0"
+    (dragover)="$event.preventDefault()"
+    (drop)="alSoltar($event)">
+
+    <div class="zona-icono">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-linejoin="round"/>
+        <path d="M14 2v6h6" stroke-linejoin="round"/>
+        <path d="m9 13 6 5m0-5-6 5" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <p class="zona-titulo" *ngIf="!nombreArchivo">Arrastra tu archivo Excel</p>
+    <p class="zona-titulo" *ngIf="nombreArchivo">{{ nombreArchivo }}</p>
+
+    <p class="zona-texto" *ngIf="!nombreArchivo">o selecciona uno desde tu equipo</p>
+    <p class="zona-texto" *ngIf="nombreArchivo">
+      {{ hojas.length }} hojas detectadas · {{ totalRegistros }} registros
+    </p>
+
+    <div class="zona-acciones">
+      <label class="boton-archivo">
+        {{ nombreArchivo ? 'Cambiar archivo' : 'Seleccionar archivo' }}
+        <input type="file" accept=".xlsx,.xls,.csv" (change)="seleccionarArchivo($event)" hidden>
+      </label>
+      <button *ngIf="modoDemo && hojas.length === 0" class="secundario" (click)="usarDatosEjemplo()">
+        Usar datos de ejemplo
+      </button>
+      <button *ngIf="hojas.length > 0" class="secundario" (click)="limpiar()">Quitar</button>
+    </div>
+  </section>
+
   <div class="mensaje-error" *ngIf="mensajeError">{{ mensajeError }}</div>
-  <button *ngIf="hojas.length > 0" (click)="enviarTodo()">Enviar todo al backend</button>
-</div>
 
-<div class="tarjeta" *ngFor="let hoja of hojas">
-  <h3>Hoja: {{ hoja.nombre }} ({{ hoja.filas.length }} registros)</h3>
+  <!-- resumen y envio -->
+  <section class="barra-resumen animar-subida" *ngIf="hojas.length > 0">
+    <div class="resumen-datos">
+      <div class="dato">
+        <span class="dato-valor">{{ hojas.length }}</span>
+        <span class="dato-texto">hojas</span>
+      </div>
+      <div class="dato">
+        <span class="dato-valor">{{ totalRegistros }}</span>
+        <span class="dato-texto">registros</span>
+      </div>
+      <div class="dato">
+        <span class="dato-valor">{{ hojasValidas }}</span>
+        <span class="dato-texto">validas</span>
+      </div>
+    </div>
 
-  <div class="mensaje-error" *ngIf="hoja.errores.length > 0">
-    <div *ngFor="let e of hoja.errores">{{ e }}</div>
+    <button (click)="enviarTodo()" [disabled]="enviandoTodo || hojasValidas === 0">
+      {{ enviandoTodo ? 'Procesando...' : (modoDemo ? 'Procesar todas las hojas' : 'Enviar todo al backend') }}
+    </button>
+  </section>
+
+  <div class="mensaje-ok" *ngIf="todasEnviadas">
+    Todas las hojas fueron procesadas correctamente. Ya puedes armar una propuesta de horario.
   </div>
 
-  <div class="mensaje-ok" *ngIf="hoja.resumen">
-    Se procesaron {{ hoja.resumen.procesados }} registros en el backend.
-    <span *ngIf="hoja.resumen.errores.length > 0"> Errores: {{ hoja.resumen.errores.join(', ') }}</span>
-  </div>
+  <!-- hojas detectadas -->
+  <section *ngFor="let hoja of hojas; let i = index"
+           class="tarjeta hoja animar-subida" [style.animation-delay]="(0.1 + i * 0.06) + 's'">
 
-  <!-- vista previa: primeras 5 filas -->
-  <div style="overflow-x: auto;">
-    <table>
-      <thead>
-        <tr>
-          <th *ngFor="let col of columnas(hoja)">{{ col }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let fila of hoja.filas.slice(0, 5)">
-          <td *ngFor="let col of columnas(hoja)">{{ fila[col] }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <p *ngIf="hoja.filas.length > 5"><i>Mostrando 5 de {{ hoja.filas.length }} filas</i></p>
+    <div class="hoja-cabecera" (click)="alternar(hoja)">
+      <div class="hoja-identidad">
+        <span class="hoja-flecha" [class.abierta]="hoja.abierta">›</span>
+        <span class="hoja-nombre">{{ hoja.nombre }}</span>
+        <span class="texto-tenue">{{ hoja.filas.length }} registros</span>
+      </div>
 
-  <button (click)="enviarHoja(hoja)" [disabled]="hoja.errores.length > 0 || hoja.enviando">
-    {{ hoja.enviando ? 'Enviando...' : 'Enviar esta hoja' }}
-  </button>
-</div>
+      <span class="insignia insignia-error" *ngIf="hoja.errores.length > 0">Con errores</span>
+      <span class="insignia insignia-ok" *ngIf="hoja.resumen">Enviada</span>
+      <span class="insignia" *ngIf="!hoja.resumen && hoja.errores.length === 0"
+            style="background: hsl(var(--secondary)); color: hsl(var(--muted-foreground))">Pendiente</span>
+    </div>
+
+    <div class="hoja-cuerpo" *ngIf="hoja.abierta">
+      <div class="mensaje-error" *ngIf="hoja.errores.length > 0">
+        <div>
+          <div *ngFor="let e of hoja.errores">{{ e }}</div>
+        </div>
+      </div>
+
+      <div class="mensaje-ok" *ngIf="hoja.resumen">
+        <div>
+          Se procesaron {{ hoja.resumen.procesados }} registros correctamente.
+          <span *ngIf="hoja.resumen.errores.length > 0">Errores: {{ hoja.resumen.errores.join(', ') }}</span>
+        </div>
+      </div>
+
+      <div class="contenedor-tabla">
+        <table>
+          <thead>
+            <tr>
+              <th *ngFor="let col of columnas(hoja)">{{ col }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let fila of hoja.filas.slice(0, 5)">
+              <td *ngFor="let col of columnas(hoja)">{{ fila[col] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="hoja-pie">
+        <span class="texto-tenue" *ngIf="hoja.filas.length > 5">
+          Mostrando 5 de {{ hoja.filas.length }} filas
+        </span>
+        <button class="secundario" (click)="enviarHoja(hoja)"
+                [disabled]="hoja.errores.length > 0 || hoja.enviando">
+          {{ hoja.enviando ? 'Enviando...' : 'Enviar esta hoja' }}
+        </button>
+      </div>
+    </div>
+  </section>
+</main>

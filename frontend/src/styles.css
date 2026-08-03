@@ -1,82 +1,308 @@
+/* ============================================================
+   Sistema de Horarios Universitarios - tema oscuro
+   ============================================================ */
+
+:root {
+  --background: 0 0% 10%;
+  --foreground: 0 0% 96%;
+  --primary: 119 99% 46%;
+  --primary-foreground: 0 0% 4%;
+  --secondary: 0 0% 18%;
+  --secondary-foreground: 0 0% 96%;
+  --muted: 0 0% 16%;
+  --muted-foreground: 0 0% 60%;
+  --accent: 119 99% 46%;
+  --accent-foreground: 0 0% 4%;
+  --destructive: 0 84% 60%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --ring: 119 99% 46%;
+  --radius: 0.5rem;
+  --nav-button: 0 0% 18%;
+  --hero-bg: 0 0% 8%;
+}
+
 * {
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: #f4f6f8;
-  color: #222;
+  padding: 0;
+  min-height: 100%;
 }
 
-h2 {
-  color: #1b3a5c;
+body {
+  font-family: 'Sora', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: hsl(var(--hero-bg));
+  color: hsl(var(--foreground));
 }
+
+/* ---------------- animaciones ---------------- */
+
+@keyframes fade-up {
+  0%   { opacity: 0; transform: translateY(20px); filter: blur(4px); }
+  100% { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+
+@keyframes fade-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes pulso-borde {
+  0%, 100% { border-color: hsl(var(--primary) / 0.35); }
+  50%      { border-color: hsl(var(--primary) / 0.9); }
+}
+
+.animar-subida {
+  opacity: 0;
+  animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animar-aparicion {
+  opacity: 0;
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+/* ---------------- contenedor de las vistas ---------------- */
+
+.vista {
+  display: block;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 108px 26px 70px;
+}
+
+@media (min-width: 768px) {
+  .vista { padding: 118px 64px 80px; }
+}
+
+.encabezado { margin-bottom: 30px; }
+
+/* ---------------- tipografia ---------------- */
+
+h1, h2, h3 {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.titulo-vista {
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+
+.titulo-vista .acento {
+  color: hsl(var(--primary));
+}
+
+.bajada-vista {
+  color: hsl(var(--muted-foreground));
+  font-weight: 300;
+  font-size: 0.95rem;
+  margin: 0 0 28px;
+  max-width: 70ch;
+}
+
+.etiqueta {
+  display: block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 7px;
+}
+
+/* ---------------- superficies ---------------- */
+
+.tarjeta {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: 20px;
+}
+
+.tarjeta-titulo {
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tarjeta-titulo::before {
+  content: '';
+  width: 3px;
+  height: 15px;
+  background: hsl(var(--primary));
+  border-radius: 2px;
+}
+
+/* ---------------- controles ---------------- */
 
 button {
-  background: #1b3a5c;
-  color: white;
+  font-family: inherit;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
   border: none;
-  padding: 8px 16px;
+  padding: 11px 22px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.1s ease, background 0.2s ease;
+}
+
+button:hover:not(:disabled) { filter: brightness(1.12); }
+button:active:not(:disabled) { transform: scale(0.97); }
+
+button:disabled {
+  background: hsl(var(--secondary));
+  color: hsl(var(--muted-foreground));
+  cursor: not-allowed;
+}
+
+button.secundario {
+  background: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+}
+
+button.secundario:hover:not(:disabled) {
+  background: hsl(var(--muted));
+  filter: none;
+}
+
+select, input[type="text"] {
+  font-family: inherit;
+  width: 100%;
+  padding: 10px 12px;
+  background: hsl(var(--input));
+  border: 1px solid hsl(var(--border));
   border-radius: 4px;
+  color: hsl(var(--foreground));
+  font-size: 0.85rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+select:focus, input:focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.15);
+}
+
+select option {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+input[type="checkbox"] {
+  accent-color: hsl(var(--primary));
+  width: 15px;
+  height: 15px;
   cursor: pointer;
 }
 
-button:hover {
-  background: #2c5985;
-}
+/* ---------------- tablas ---------------- */
 
-button:disabled {
-  background: #9aa7b3;
-  cursor: not-allowed;
+.contenedor-tabla {
+  overflow-x: auto;
+  border: 1px solid hsl(var(--border));
+  border-radius: 4px;
 }
 
 table {
   border-collapse: collapse;
   width: 100%;
-  background: white;
-  font-size: 13px;
+  font-size: 0.78rem;
 }
 
 th, td {
-  border: 1px solid #d0d7de;
-  padding: 6px 8px;
+  padding: 9px 12px;
   text-align: left;
+  border-bottom: 1px solid hsl(var(--border));
+  white-space: nowrap;
 }
 
 th {
-  background: #e8eef4;
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  font-weight: 600;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
-select, input {
-  padding: 6px;
-  border: 1px solid #c0c8d0;
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: hsl(var(--secondary) / 0.5); }
+
+/* ---------------- mensajes ---------------- */
+
+.mensaje-ok, .mensaje-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
   border-radius: 4px;
-  width: 100%;
-}
-
-.tarjeta {
-  background: white;
-  border: 1px solid #dde3e9;
-  border-radius: 6px;
-  padding: 16px;
-  margin-bottom: 16px;
+  margin: 14px 0;
+  font-size: 0.85rem;
+  border-left: 3px solid;
 }
 
 .mensaje-ok {
-  background: #e6f4ea;
-  border: 1px solid #34a853;
-  color: #1e7e34;
-  padding: 10px;
-  border-radius: 4px;
-  margin: 10px 0;
+  background: hsl(var(--primary) / 0.08);
+  border-left-color: hsl(var(--primary));
+  color: hsl(var(--primary));
 }
 
 .mensaje-error {
-  background: #fdecea;
-  border: 1px solid #d93025;
-  color: #a50e0e;
-  padding: 10px;
-  border-radius: 4px;
-  margin: 10px 0;
+  background: hsl(var(--destructive) / 0.08);
+  border-left-color: hsl(var(--destructive));
+  color: hsl(var(--destructive));
 }
+
+.insignia {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.insignia-ok {
+  background: hsl(var(--primary) / 0.15);
+  color: hsl(var(--primary));
+}
+
+.insignia-error {
+  background: hsl(var(--destructive) / 0.15);
+  color: hsl(var(--destructive));
+}
+
+.texto-tenue {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8rem;
+  font-weight: 300;
+}
+
+/* barra de desplazamiento */
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: hsl(var(--hero-bg)); }
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.5); }

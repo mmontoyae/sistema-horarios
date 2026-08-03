@@ -1,53 +1,89 @@
-<h2>Horario semanal y conflictos</h2>
+<main class="vista">
+  <header class="encabezado animar-subida" style="animation-delay: 0.05s">
+    <h2 class="titulo-vista">Horario <span class="acento">semanal</span></h2>
+    <p class="bajada-vista">
+      Matriz de la semana con los bloques ya confirmados y el registro de conflictos
+      detectados durante la sesion. Los bloques inconsistentes aparecen resaltados.
+    </p>
+  </header>
 
-<p *ngIf="cargando">Cargando horario...</p>
+  <div class="mensaje-error" *ngIf="mensajeError">{{ mensajeError }}</div>
 
-<div class="tarjeta" *ngIf="!cargando">
-  <h3>Matriz semanal (bloques confirmados)</h3>
-  <div style="overflow-x: auto;">
-    <table>
-      <thead>
-        <tr>
-          <th style="width: 70px;">Hora</th>
-          <th *ngFor="let dia of dias">{{ dia }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let hora of horas">
-          <td><b>{{ hora }}</b></td>
-          <td *ngFor="let dia of dias">
-            <div *ngFor="let b of bloquesEn(dia, hora)"
-                 class="celda-bloque"
-                 [class.celda-conflicto]="tieneConflicto(b)">
-              {{ b.asignatura_id }} / {{ b.paralelo_id }}<br>
-              {{ b.docente_id }} - {{ b.espacio_id }}<br>
-              {{ b.hora_inicio }} a {{ b.hora_fin }}
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <p *ngIf="horario.length === 0"><i>Todavia no hay bloques confirmados en el horario.</i></p>
-</div>
+  <section class="indicadores animar-subida" style="animation-delay: 0.1s">
+    <div class="indicador">
+      <span class="indicador-valor">{{ totalBloques }}</span>
+      <span class="indicador-texto">bloques confirmados</span>
+    </div>
+    <div class="indicador">
+      <span class="indicador-valor" [class.alerta]="conflictos.length > 0">{{ conflictos.length }}</span>
+      <span class="indicador-texto">conflictos detectados</span>
+    </div>
+    <div class="indicador">
+      <span class="indicador-valor">{{ codigosDistintos }}</span>
+      <span class="indicador-texto">tipos de conflicto</span>
+    </div>
+  </section>
 
-<div class="tarjeta">
-  <h3>Conflictos detectados en la sesion ({{ conflictos.length }})</h3>
-  <table *ngIf="conflictos.length > 0">
-    <thead>
-      <tr>
-        <th>Codigo</th>
-        <th>Detalle</th>
-        <th>Bloque</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let c of conflictos">
-        <td><b>{{ c.codigo }}</b></td>
-        <td>{{ c.detalle }}</td>
-        <td>{{ c.bloque }}</td>
-      </tr>
-    </tbody>
-  </table>
-  <p *ngIf="conflictos.length === 0"><i>No se han detectado conflictos.</i></p>
-</div>
+  <p *ngIf="cargando" class="texto-tenue">Cargando horario...</p>
+
+  <section class="tarjeta animar-subida" style="animation-delay: 0.16s" *ngIf="!cargando">
+    <h3 class="tarjeta-titulo">Matriz semanal</h3>
+
+    <div class="contenedor-tabla">
+      <table class="matriz">
+        <thead>
+          <tr>
+            <th class="col-hora">Hora</th>
+            <th *ngFor="let dia of dias">{{ dia }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let hora of horas">
+            <td class="col-hora">{{ hora }}</td>
+            <td *ngFor="let dia of dias" class="celda">
+              <div *ngFor="let b of bloquesEn(dia, hora)"
+                   class="bloque"
+                   [class.bloque-conflicto]="tieneConflicto(b)"
+                   [class.bloque-continuacion]="!esInicio(b, hora)">
+                <span class="bloque-codigo">{{ b.asignatura_id }} / {{ b.paralelo_id }}</span>
+                <span class="bloque-detalle">{{ b.docente_id }} · {{ b.espacio_id }}</span>
+                <span class="bloque-horas">{{ b.hora_inicio }} – {{ b.hora_fin }}</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="texto-tenue" *ngIf="horario.length === 0" style="margin-top: 14px">
+      Todavia no hay bloques confirmados. Valida una propuesta marcando la opcion de confirmar.
+    </p>
+  </section>
+
+  <section class="tarjeta animar-subida" style="animation-delay: 0.22s">
+    <h3 class="tarjeta-titulo">Conflictos de la sesion</h3>
+
+    <div class="contenedor-tabla" *ngIf="conflictos.length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>Codigo</th>
+            <th>Detalle</th>
+            <th>Bloque</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of conflictos">
+            <td><span class="insignia insignia-error">{{ c.codigo }}</span></td>
+            <td>{{ c.detalle }}</td>
+            <td class="texto-tenue">{{ c.bloque }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="texto-tenue" *ngIf="conflictos.length === 0">
+      No se han registrado conflictos en esta sesion.
+    </p>
+  </section>
+</main>

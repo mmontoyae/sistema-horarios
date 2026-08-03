@@ -7,7 +7,8 @@ import { ApiService, ResultadoValidacion } from '../../servicios/api.service';
   selector: 'app-horario',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './horario.component.html'
+  templateUrl: './horario.component.html',
+  styleUrls: ['./horario.component.css']
 })
 export class HorarioComponent implements OnInit {
 
@@ -38,16 +39,24 @@ export class HorarioComponent implements OnInit {
   ngOnInit() {
     this.api.obtenerCatalogos().subscribe({
       next: datos => this.catalogos = datos,
-      error: () => this.mensajeError = 'No se pudieron cargar los catalogos. Verifique que el backend este corriendo y que los datos esten importados.'
+      error: () => this.mensajeError = 'No se pudieron cargar los catalogos. Verifique que el backend este disponible y que los datos esten importados.'
     });
   }
 
   get paralelosFiltrados(): any[] {
     if (!this.catalogos) return [];
-    // solo los paralelos de la asignatura seleccionada
     return this.catalogos.paralelos.filter(
       (p: any) => !this.propuesta.asignatura_id || p.asignatura_id === this.propuesta.asignatura_id
     );
+  }
+
+  get formularioCompleto(): boolean {
+    return !!(this.propuesta.asignatura_id && this.propuesta.paralelo_id &&
+              this.propuesta.docente_id && this.propuesta.espacio_id);
+  }
+
+  get sinDatos(): boolean {
+    return !!this.catalogos && (this.catalogos.asignaturas?.length ?? 0) === 0;
   }
 
   validar() {
@@ -61,7 +70,9 @@ export class HorarioComponent implements OnInit {
         this.enviando = false;
       },
       error: err => {
-        this.mensajeError = 'Error al validar: ' + (err.error?.detail ? JSON.stringify(err.error.detail) : err.message);
+        this.mensajeError = err.status === 0
+          ? 'No se pudo contactar al backend.'
+          : 'Error al validar: ' + (err.error?.detail ? JSON.stringify(err.error.detail) : err.message);
         this.enviando = false;
       }
     });

@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -12,10 +13,18 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# comunicacion con el frontend Angular
+# Origenes permitidos. En local es el servidor de Angular; en produccion se
+# define la variable de entorno ORIGENES_PERMITIDOS con las URL separadas
+# por coma, por ejemplo: https://sistema-horarios.vercel.app
+ORIGENES_LOCALES = ["http://localhost:4200", "http://127.0.0.1:4200"]
+ORIGENES_EXTRA = [
+    o.strip() for o in os.getenv("ORIGENES_PERMITIDOS", "").split(",") if o.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200"],
+    allow_origins=ORIGENES_LOCALES + ORIGENES_EXTRA,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,6 +37,12 @@ app.include_router(horarios.router)
 @app.get("/")
 def raiz():
     return {"mensaje": "API del sistema de horarios funcionando"}
+
+
+@app.get("/salud")
+def salud():
+    """Endpoint simple para que el servicio de hosting verifique que esta vivo."""
+    return {"estado": "ok"}
 
 
 @app.get("/catalogos")

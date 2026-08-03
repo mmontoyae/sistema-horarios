@@ -1,0 +1,58 @@
+# Publica la demostracion del frontend en GitHub Pages cada vez que
+# se envian cambios a la rama main.
+
+name: Publicar demo en GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Compilar en modo demostracion
+        run: npm run build:demo
+
+      - name: Preparar rutas para GitHub Pages
+        # GitHub Pages sirve 404.html cuando la ruta no existe como archivo;
+        # al ser una copia del index, el enrutador de Angular toma el control.
+        run: |
+          cp dist/horarios-frontend/browser/index.html dist/horarios-frontend/browser/404.html
+          touch dist/horarios-frontend/browser/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist/horarios-frontend/browser
+
+  desplegar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - id: despliegue
+        uses: actions/deploy-pages@v4

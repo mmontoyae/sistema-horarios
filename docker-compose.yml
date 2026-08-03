@@ -1,0 +1,63 @@
+# Despliegue completo del sistema en una sola instancia EC2.
+#
+#   docker compose up -d --build
+#
+# Levanta:
+#   bd              -> SQL Server 2022 Express
+#   inicializar_bd  -> ejecuta el script de creacion y termina
+#   api             -> backend FastAPI
+#   web             -> Nginx con el frontend Angular, redirige /api al backend
+#
+# La contrasena se toma del archivo .env (copiar desde .env.ejemplo).
+
+services:
+
+  bd:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: horarios_bd
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${CLAVE_SA}
+      MSSQL_PID: Express
+      MSSQL_MEMORY_LIMIT_MB: "1024"
+    volumes:
+      - datos_bd:/var/opt/mssql
+    restart: unless-stopped
+
+  # crea las tablas, funciones y el procedimiento almacenado; luego termina
+  inicializar_bd:
+    build: ./backend
+    container_name: horarios_init
+    depends_on:
+      - bd
+    environment:
+      CLAVE_SA: ${CLAVE_SA}
+      BD_HOST: bd
+    volumes:
+      - ./database:/scripts:ro
+    command: python inicializar_bd.py
+    restart: "no"
+
+  api:
+    build: ./backend
+    container_name: horarios_api
+    depends_on:
+      - bd
+    environment:
+      DATABASE_URL: mssql+pyodbc://sa:${CLAVE_SA}@bd:1433/horarios_upse?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=yes
+      ORIGENES_PERMITIDOS: ${ORIGENES_PERMITIDOS:-}
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: horarios_web
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+    restart: unless-stopped
+
+volumes:
+  datos_bd:
