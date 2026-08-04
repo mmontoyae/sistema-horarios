@@ -13,21 +13,53 @@
   background-image: url('/assets/fondo-portada.webp');
   background-size: cover;
   background-position: center;
+  animation: acercamiento 40s ease-in-out infinite alternate;
 }
 
-.fondo-3d {
+/* retícula de bloques que recuerda una malla de horario */
+.fondo-reticula {
   position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.8s ease-in;
+  inset: -10%;
+  background-image:
+    linear-gradient(hsl(var(--primary) / 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--primary) / 0.055) 1px, transparent 1px);
+  background-size: 74px 74px;
+  animation: deriva 26s linear infinite;
 }
 
-.fondo-3d.visible { opacity: 1; }
+/* halo verde que se desplaza muy despacio */
+.fondo-destello {
+  position: absolute;
+  top: 18%;
+  right: 12%;
+  width: 44vw;
+  height: 44vw;
+  max-width: 620px;
+  max-height: 620px;
+  border-radius: 50%;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.16) 0%, transparent 68%);
+  filter: blur(46px);
+  animation: latido 14s ease-in-out infinite;
+}
 
-.fondo-3d spline-viewer {
-  width: 100%;
-  height: 100%;
-  display: block;
+@keyframes acercamiento {
+  from { transform: scale(1); }
+  to   { transform: scale(1.07); }
+}
+
+@keyframes deriva {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(74px, 74px); }
+}
+
+@keyframes latido {
+  0%, 100% { opacity: 0.55; transform: translate(0, 0) scale(1); }
+  50%      { opacity: 1;    transform: translate(-3%, 2%) scale(1.1); }
+}
+
+/* si el sistema pide menos animacion, todo queda quieto */
+@media (prefers-reduced-motion: reduce) {
+  .fondo-imagen, .fondo-reticula, .fondo-destello { animation: none; }
 }
 
 .velo {

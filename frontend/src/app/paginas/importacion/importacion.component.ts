@@ -1,5 +1,6 @@
 import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ExcelService } from '../../servicios/excel.service';
 import { ApiService, ResumenImportacion } from '../../servicios/api.service';
 import { DATOS_EJEMPLO } from '../../servicios/datos-ejemplo';
@@ -16,7 +17,7 @@ interface EstadoHoja {
 @Component({
   selector: 'app-importacion',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './importacion.component.html',
   styleUrls: ['./importacion.component.css']
 })
@@ -177,6 +178,16 @@ export class ImportacionComponent {
 
   alternar(hoja: EstadoHoja) {
     hoja.abierta = !hoja.abierta;
+  }
+
+  /** Quita una fila de la vista previa antes de enviarla al backend. */
+  eliminarFila(hoja: EstadoHoja, indice: number) {
+    hoja.filas.splice(indice, 1);
+    hoja.resumen = undefined;
+  }
+
+  esBooleano(valor: any): boolean {
+    return typeof valor === 'boolean';
   }
 
   get totalRegistros(): number {

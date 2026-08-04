@@ -199,3 +199,58 @@
   flex-wrap: wrap;
   margin-top: 14px;
 }
+
+/* ---------- edicion de las celdas ---------- */
+
+.celda-input {
+  width: 100%;
+  min-width: 90px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-size: 0.78rem;
+  font-family: inherit;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.celda-input:hover { border-color: hsl(var(--border)); }
+
+.celda-input:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.05);
+  box-shadow: none;
+}
+
+.celda-check {
+  width: 16px;
+  height: 16px;
+}
+
+.boton-eliminar-fila {
+  border: 1px solid hsl(var(--border));
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  line-height: 1;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.boton-eliminar-fila:hover {
+  background: hsl(var(--destructive) / 0.12);
+  color: hsl(var(--destructive));
+  border-color: hsl(var(--destructive) / 0.4);
+  filter: none;
+}
+
+/* la tabla editable puede crecer: se limita el alto visible */
+.hoja-cuerpo .contenedor-tabla {
+  max-height: 420px;
+  overflow-y: auto;
+}

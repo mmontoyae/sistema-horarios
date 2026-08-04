@@ -13,8 +13,8 @@ import { environment } from '../environments/environment';
       Modo demostracion · la validacion se ejecuta en el navegador, sin backend ni base de datos
     </div>
 
-    <nav class="barra" [class.barra-solida]="!esInicio" [class.barra-con-cinta]="modoDemo">
-      <a routerLink="/inicio" class="logo">
+    <nav class="barra" [class.barra-solida]="!esInicio || menuAbierto" [class.barra-con-cinta]="modoDemo">
+      <a routerLink="/inicio" class="logo" (click)="cerrarMenu()">
         HORARIOS<span class="logo-acento">UPSE</span>
       </a>
 
@@ -25,7 +25,26 @@ import { environment } from '../environments/environment';
       </div>
 
       <a routerLink="/importacion" class="boton-barra">Comenzar</a>
+
+      <button
+        type="button"
+        class="boton-menu"
+        [class.abierto]="menuAbierto"
+        (click)="alternarMenu()"
+        [attr.aria-expanded]="menuAbierto"
+        aria-label="Abrir menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </nav>
+
+    <div class="menu-movil" [class.visible]="menuAbierto">
+      <a routerLink="/inicio" routerLinkActive="activo" (click)="cerrarMenu()">Inicio</a>
+      <a routerLink="/importacion" routerLinkActive="activo" (click)="cerrarMenu()">Importar</a>
+      <a routerLink="/horario" routerLinkActive="activo" (click)="cerrarMenu()">Propuesta</a>
+      <a routerLink="/conflictos" routerLinkActive="activo" (click)="cerrarMenu()">Horario</a>
+    </div>
 
     <router-outlet></router-outlet>
   `,
@@ -117,9 +136,69 @@ import { environment } from '../environments/environment';
     .boton-barra:hover { background: hsl(0 0% 26%); }
     .boton-barra:active { transform: scale(0.97); }
 
+    .boton-menu {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      width: 34px;
+      height: 34px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      z-index: 70;
+    }
+
+    .boton-menu span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: hsl(var(--foreground));
+      transition: transform 0.25s ease, opacity 0.2s ease;
+    }
+
+    .boton-menu.abierto span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .boton-menu.abierto span:nth-child(2) { opacity: 0; }
+    .boton-menu.abierto span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .menu-movil {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100vh;
+      width: min(78vw, 300px);
+      background: hsl(var(--hero-bg));
+      border-left: 1px solid hsl(var(--border));
+      z-index: 55;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 96px 28px 28px;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+
+    .menu-movil.visible { transform: translateX(0); }
+
+    .menu-movil a {
+      color: hsl(var(--foreground));
+      text-decoration: none;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 14px 0;
+      border-bottom: 1px solid hsl(var(--border));
+    }
+
+    .menu-movil a.activo { color: hsl(var(--primary)); }
+
     @media (min-width: 768px) {
       .enlaces { display: flex; }
       .boton-barra { display: inline-flex; }
+      .boton-menu { display: none; }
+      .menu-movil { display: none; }
       .barra { padding: 20px 64px; }
     }
   `]
@@ -127,6 +206,7 @@ import { environment } from '../environments/environment';
 export class AppComponent {
   esInicio = true;
   modoDemo = environment.modoDemo;
+  menuAbierto = false;
 
   constructor(private router: Router) {
     this.router.events
@@ -134,6 +214,15 @@ export class AppComponent {
       .subscribe(e => {
         const url = (e as NavigationEnd).urlAfterRedirects;
         this.esInicio = url === '/' || url.startsWith('/inicio');
+        this.menuAbierto = false;
       });
+  }
+
+  alternarMenu(): void {
+    this.menuAbierto = !this.menuAbierto;
+  }
+
+  cerrarMenu(): void {
+    this.menuAbierto = false;
   }
 }

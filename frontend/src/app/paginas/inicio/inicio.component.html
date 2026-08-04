@@ -1,16 +1,9 @@
 <section class="portada">
 
-  <!-- fondo estatico: se ve de inmediato -->
+  <!-- fondo: imagen ligera + reticula animada en CSS -->
   <div class="fondo-imagen"></div>
-
-  <!-- escena 3D: solo en equipos que la mueven con soltura -->
-  <div class="fondo-3d" *ngIf="mostrar3d" [class.visible]="escenaLista">
-    <spline-viewer
-      url="https://prod.spline.design/Slk6b8kz3LRlKiyk/scene.splinecode"
-      loading-anim-type="none"
-      (load)="alCargarEscena()">
-    </spline-viewer>
-  </div>
+  <div class="fondo-reticula"></div>
+  <div class="fondo-destello"></div>
 
   <div class="velo"></div>
 
