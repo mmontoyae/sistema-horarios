@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from datetime import datetime
@@ -61,3 +61,22 @@ def listar_horario(db: Session = Depends(get_db)):
     """Devuelve los bloques confirmados para armar la matriz semanal."""
     datos = consultas.cargar_datos(db)
     return datos["horarios"]
+
+
+@router.delete("")
+def vaciar_horario(db: Session = Depends(get_db)):
+    """Elimina todos los bloques confirmados, sin tocar los insumos."""
+    eliminados = db.query(models.Horario).delete()
+    db.commit()
+    return {"mensaje": "horario vaciado", "eliminados": eliminados}
+
+
+@router.delete("/bloque/{horario_id}")
+def eliminar_bloque(horario_id: int, db: Session = Depends(get_db)):
+    """Elimina un solo bloque del horario."""
+    bloque = db.get(models.Horario, horario_id)
+    if bloque is None:
+        raise HTTPException(status_code=404, detail="El bloque no existe")
+    db.delete(bloque)
+    db.commit()
+    return {"mensaje": "bloque eliminado", "horario_id": horario_id}

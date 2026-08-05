@@ -70,6 +70,64 @@ export class ConflictosComponent implements OnInit {
     return new Set(this.conflictos.map(c => c.codigo)).size;
   }
 
+  // ---------- borrado ----------
+
+  confirmandoVaciado = false;
+  procesando = false;
+  mensajeAccion = '';
+
+  recargar() {
+    this.api.obtenerHorario().subscribe({ next: d => this.horario = d });
+    this.api.obtenerConflictos().subscribe({ next: d => this.conflictos = d });
+  }
+
+  eliminarBloque(bloque: any) {
+    this.procesando = true;
+    this.api.eliminarBloque(bloque.horario_id).subscribe({
+      next: () => {
+        this.procesando = false;
+        this.mensajeAccion = 'Bloque eliminado del horario.';
+        this.recargar();
+      },
+      error: () => {
+        this.procesando = false;
+        this.mensajeError = 'No se pudo eliminar el bloque.';
+      }
+    });
+  }
+
+  vaciarHorario() {
+    this.procesando = true;
+    this.api.vaciarHorario().subscribe({
+      next: r => {
+        this.procesando = false;
+        this.confirmandoVaciado = false;
+        this.mensajeAccion = `Se eliminaron ${r.eliminados ?? 0} bloques del horario.`;
+        this.recargar();
+      },
+      error: () => {
+        this.procesando = false;
+        this.confirmandoVaciado = false;
+        this.mensajeError = 'No se pudo vaciar el horario.';
+      }
+    });
+  }
+
+  limpiarConflictos() {
+    this.procesando = true;
+    this.api.limpiarConflictos().subscribe({
+      next: () => {
+        this.procesando = false;
+        this.conflictos = [];
+        this.mensajeAccion = 'Se limpio el registro de conflictos.';
+      },
+      error: () => {
+        this.procesando = false;
+        this.mensajeError = 'No se pudo limpiar el registro.';
+      }
+    });
+  }
+
   private aMinutos(hora: string): number {
     const [h, m] = hora.split(':').map(Number);
     return h * 60 + m;

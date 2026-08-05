@@ -1,25 +1,38 @@
 /* ============================================================
-   Sistema de Horarios Universitarios - tema oscuro
+   Sistema de Horarios Universitarios - tema institucional UPSE
    ============================================================ */
 
+/* Paleta institucional UPSE
+   azul del logotipo #002848 · verde del escudo #009f3b */
+
 :root {
-  --background: 0 0% 10%;
-  --foreground: 0 0% 96%;
-  --primary: 119 99% 46%;
-  --primary-foreground: 0 0% 4%;
-  --secondary: 0 0% 18%;
-  --secondary-foreground: 0 0% 96%;
-  --muted: 0 0% 16%;
-  --muted-foreground: 0 0% 60%;
-  --accent: 119 99% 46%;
-  --accent-foreground: 0 0% 4%;
-  --destructive: 0 84% 60%;
-  --border: 0 0% 20%;
-  --input: 0 0% 20%;
-  --ring: 119 99% 46%;
+  --background: 0 0% 100%;
+  --superficie: 210 24% 98%;
+  --foreground: 207 45% 13%;
+
+  --primary: 207 100% 14%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 210 24% 95%;
+  --secondary-foreground: 207 45% 13%;
+
+  --muted: 210 24% 96%;
+  --muted-foreground: 207 14% 42%;
+
+  --accent: 142 100% 31%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 72% 45%;
+
+  --border: 210 20% 88%;
+  --input: 0 0% 100%;
+  --ring: 207 100% 30%;
+
   --radius: 0.5rem;
-  --nav-button: 0 0% 18%;
-  --hero-bg: 0 0% 8%;
+  --nav-button: 207 100% 14%;
+  --hero-bg: 0 0% 100%;
+
+  --sombra-tarjeta: 0 1px 2px hsl(207 30% 20% / 0.05), 0 4px 14px hsl(207 30% 20% / 0.05);
 }
 
 * {
@@ -36,7 +49,7 @@ body {
   font-family: 'Sora', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: hsl(var(--hero-bg));
+  background: hsl(var(--superficie));
   color: hsl(var(--foreground));
 }
 
@@ -53,8 +66,8 @@ body {
 }
 
 @keyframes pulso-borde {
-  0%, 100% { border-color: hsl(var(--primary) / 0.35); }
-  50%      { border-color: hsl(var(--primary) / 0.9); }
+  0%, 100% { border-left-color: hsl(var(--destructive) / 0.45); }
+  50%      { border-left-color: hsl(var(--destructive)); }
 }
 
 .animar-subida {
@@ -127,6 +140,7 @@ h1, h2, h3 {
   border-radius: var(--radius);
   padding: 22px;
   margin-bottom: 20px;
+  box-shadow: var(--sombra-tarjeta);
 }
 
 .tarjeta-titulo {
@@ -171,17 +185,49 @@ button:disabled {
   background: hsl(var(--secondary));
   color: hsl(var(--muted-foreground));
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 button.secundario {
-  background: hsl(var(--secondary));
+  background: hsl(var(--background));
   color: hsl(var(--foreground));
   border: 1px solid hsl(var(--border));
 }
 
 button.secundario:hover:not(:disabled) {
-  background: hsl(var(--muted));
+  background: hsl(var(--secondary));
   filter: none;
+}
+
+button.peligro {
+  background: hsl(var(--destructive));
+  color: hsl(0 0% 100%);
+}
+
+/* ---------- zona de acciones irreversibles ---------- */
+
+.zona-peligro {
+  border-color: hsl(var(--destructive) / 0.35);
+}
+
+.zona-peligro .tarjeta-titulo::before {
+  background: hsl(var(--destructive));
+}
+
+.acciones-peligro {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.confirmacion {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: hsl(var(--destructive) / 0.08);
+  border: 1px solid hsl(var(--destructive) / 0.3);
+  font-size: 0.85rem;
 }
 
 select, input[type="text"] {
@@ -245,7 +291,7 @@ th {
 }
 
 tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover td { background: hsl(var(--secondary) / 0.5); }
+tbody tr:hover td { background: hsl(var(--secondary) / 0.6); }
 
 /* ---------------- mensajes ---------------- */
 
@@ -261,9 +307,9 @@ tbody tr:hover td { background: hsl(var(--secondary) / 0.5); }
 }
 
 .mensaje-ok {
-  background: hsl(var(--primary) / 0.08);
-  border-left-color: hsl(var(--primary));
-  color: hsl(var(--primary));
+  background: hsl(var(--accent) / 0.08);
+  border-left-color: hsl(var(--accent));
+  color: hsl(142 100% 24%);
 }
 
 .mensaje-error {
@@ -283,8 +329,8 @@ tbody tr:hover td { background: hsl(var(--secondary) / 0.5); }
 }
 
 .insignia-ok {
-  background: hsl(var(--primary) / 0.15);
-  color: hsl(var(--primary));
+  background: hsl(var(--accent) / 0.12);
+  color: hsl(142 100% 24%);
 }
 
 .insignia-error {
@@ -300,7 +346,7 @@ tbody tr:hover td { background: hsl(var(--secondary) / 0.5); }
 
 /* barra de desplazamiento */
 ::-webkit-scrollbar { width: 9px; height: 9px; }
-::-webkit-scrollbar-track { background: hsl(var(--hero-bg)); }
+::-webkit-scrollbar-track { background: hsl(var(--superficie)); }
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--border));
   border-radius: 5px;

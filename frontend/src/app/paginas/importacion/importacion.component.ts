@@ -208,6 +208,38 @@ export class ImportacionComponent {
     this.mensajeError = '';
   }
 
+  // ---------- borrado en el servidor ----------
+
+  confirmandoBorrado = false;
+  borrando = false;
+  mensajeBorrado = '';
+
+  pedirConfirmacion() {
+    this.confirmandoBorrado = true;
+    this.mensajeBorrado = '';
+  }
+
+  cancelarBorrado() {
+    this.confirmandoBorrado = false;
+  }
+
+  borrarTodo() {
+    this.borrando = true;
+    this.api.borrarTodo().subscribe({
+      next: () => {
+        this.borrando = false;
+        this.confirmandoBorrado = false;
+        this.mensajeBorrado = 'Se eliminaron todos los insumos y el horario. Puedes volver a cargar el archivo.';
+        this.limpiar();
+      },
+      error: err => {
+        this.borrando = false;
+        this.confirmandoBorrado = false;
+        this.mensajeError = this.textoError(err);
+      }
+    });
+  }
+
   // ---------- envio al backend ----------
 
   enviarHoja(hoja: EstadoHoja) {

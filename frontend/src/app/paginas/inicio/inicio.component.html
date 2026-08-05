@@ -1,53 +1,99 @@
 <section class="portada">
 
-  <!-- fondo: imagen ligera + reticula animada en CSS -->
-  <div class="fondo-imagen"></div>
+  <!-- capas de fondo -->
   <div class="fondo-reticula"></div>
-  <div class="fondo-destello"></div>
+  <div class="fondo-escudo"></div>
+  <div class="fondo-halo"></div>
 
-  <div class="velo"></div>
+  <div class="cuerpo">
 
-  <div class="contenido">
-    <p class="marca animar-subida" style="animation-delay: 0.1s">
-      UPSE · Facultad de Sistemas y Telecomunicaciones
-    </p>
+    <!-- columna de texto -->
+    <div class="contenido">
+      <p class="marca animar-subida" style="animation-delay: 0.1s">
+        Facultad de Sistemas y Telecomunicaciones
+      </p>
 
-    <h1 class="titulo animar-subida" style="animation-delay: 0.2s">
-      HORARIOS<span class="acento"> UPSE</span>
-    </h1>
+      <h1 class="titulo animar-subida" style="animation-delay: 0.2s">
+        Horarios<span class="acento">UPSE</span>
+      </h1>
 
-    <p class="lema animar-subida" style="animation-delay: 0.4s">
-      Planificamos la semana sin cruces.
-    </p>
+      <p class="lema animar-subida" style="animation-delay: 0.35s">
+        Planificamos la semana sin cruces.
+      </p>
 
-    <p class="descripcion animar-subida" style="animation-delay: 0.55s">
-      Carga los insumos academicos desde un archivo Excel, arma la propuesta de horario
-      y deja que el sistema detecte los conflictos: docentes cruzados, aulas ocupadas,
-      espacios incompatibles y excesos de carga horaria. Todo validado antes de publicar.
-    </p>
+      <p class="descripcion animar-subida" style="animation-delay: 0.5s">
+        Carga los insumos academicos desde un archivo Excel, arma la propuesta de horario
+        y deja que el sistema detecte los conflictos: docentes cruzados, aulas ocupadas,
+        espacios incompatibles y excesos de carga horaria. Todo validado antes de publicar.
+      </p>
 
-    <div class="acciones animar-subida" style="animation-delay: 0.7s">
-      <a routerLink="/importacion" class="boton-primario">Cargar insumos</a>
-      <a routerLink="/conflictos" class="boton-claro">Ver horario</a>
+      <div class="acciones animar-subida" style="animation-delay: 0.65s">
+        <a routerLink="/importacion" class="boton-primario">Cargar insumos</a>
+        <a routerLink="/conflictos" class="boton-claro">Ver horario</a>
+      </div>
+
+      <div class="metricas animar-subida" style="animation-delay: 0.8s">
+        <div class="metrica">
+          <span class="metrica-valor">7</span>
+          <span class="metrica-texto">reglas validadas</span>
+        </div>
+        <div class="metrica">
+          <span class="metrica-valor">6</span>
+          <span class="metrica-texto">entidades academicas</span>
+        </div>
+        <div class="metrica">
+          <span class="metrica-valor">17</span>
+          <span class="metrica-texto">pruebas unitarias</span>
+        </div>
+      </div>
+
+      <p class="pie animar-subida" style="animation-delay: 0.95s">
+        Proyecto de aula · Programacion Funcional · Software 5/1
+      </p>
     </div>
 
-    <div class="metricas animar-subida" style="animation-delay: 0.85s">
-      <div class="metrica">
-        <span class="metrica-valor">7</span>
-        <span class="metrica-texto">reglas validadas</span>
-      </div>
-      <div class="metrica">
-        <span class="metrica-valor">6</span>
-        <span class="metrica-texto">entidades academicas</span>
-      </div>
-      <div class="metrica">
-        <span class="metrica-valor">17</span>
-        <span class="metrica-texto">pruebas unitarias</span>
+    <!-- ilustracion: la malla semanal armandose sola -->
+    <div class="muestra animar-subida" style="animation-delay: 0.45s" aria-hidden="true">
+      <div class="muestra-marco">
+        <div class="muestra-cabecera">
+          <span class="punto"></span>
+          <span class="muestra-titulo">Semana 2026-2</span>
+        </div>
+
+        <div class="malla">
+          <div class="malla-dias">
+            <span>LUN</span><span>MAR</span><span>MIE</span><span>JUE</span><span>VIE</span>
+          </div>
+
+          <div class="malla-cuerpo">
+            <div class="linea-hora" *ngFor="let h of [1,2,3,4,5,6]"></div>
+
+            <div class="clase c1" [style.animation-delay]="'1.0s'">
+              <span>Prog. Funcional</span><small>LAB202 · 07:00</small>
+            </div>
+            <div class="clase c2" [style.animation-delay]="'1.15s'">
+              <span>Base de Datos</span><small>LAB202 · 09:00</small>
+            </div>
+            <div class="clase c3" [style.animation-delay]="'1.3s'">
+              <span>Requisitos</span><small>A101 · 14:00</small>
+            </div>
+            <div class="clase c4" [style.animation-delay]="'1.45s'">
+              <span>Arquitectura</span><small>A102 · 07:00</small>
+            </div>
+            <div class="clase c5 conflicto" [style.animation-delay]="'1.6s'">
+              <span>Redes</span><small>Aula sin cupo</small>
+            </div>
+
+            <div class="marcador"></div>
+          </div>
+        </div>
+
+        <div class="muestra-pie">
+          <span class="senal ok">6 bloques validos</span>
+          <span class="senal alerta">1 conflicto</span>
+        </div>
       </div>
     </div>
 
-    <p class="pie animar-subida" style="animation-delay: 1s">
-      Proyecto de aula · Programacion Funcional · Software 5/1
-    </p>
   </div>
 </section>

@@ -62,4 +62,30 @@ export class ApiService {
     if (this.modoDemo) return this.demo.obtenerCatalogos();
     return this.http.get<any>(`${this.urlBase}/catalogos`);
   }
+
+  // ---------- borrado ----------
+
+  /** Elimina los insumos cargados y, con ellos, el horario. */
+  borrarTodo(): Observable<any> {
+    if (this.modoDemo) return this.demo.borrarTodo();
+    return this.http.delete<any>(`${this.urlBase}/import/todo`);
+  }
+
+  /** Vacia el horario dejando los insumos intactos. */
+  vaciarHorario(): Observable<any> {
+    if (this.modoDemo) return this.demo.vaciarHorario();
+    return this.http.delete<any>(`${this.urlBase}/horarios`);
+  }
+
+  /** Elimina un bloque concreto del horario. */
+  eliminarBloque(horarioId: number): Observable<any> {
+    if (this.modoDemo) return this.demo.eliminarBloque(horarioId);
+    return this.http.delete<any>(`${this.urlBase}/horarios/bloque/${horarioId}`);
+  }
+
+  /** Limpia el registro de conflictos de la sesion. */
+  limpiarConflictos(): Observable<any> {
+    if (this.modoDemo) return this.demo.limpiarConflictos();
+    return this.http.delete<any>(`${this.urlBase}/horarios/conflictos`);
+  }
 }

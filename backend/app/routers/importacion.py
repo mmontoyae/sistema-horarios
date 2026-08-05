@@ -52,6 +52,32 @@ def importar_distributivo(datos: list[schemas.DistributivoIn], db: Session = Dep
     return _guardar(db, models.Distributivo, [d.model_dump() for d in datos], "distributivo_id")
 
 
+@router.delete("/todo")
+def borrar_todo(db: Session = Depends(get_db)):
+    """
+    Vacia todas las tablas de insumos y tambien el horario.
+
+    El orden importa: primero las tablas que dependen de otras, para no
+    violar las claves foraneas.
+    """
+    orden = [
+        models.Horario,
+        models.DisponibilidadDocente,
+        models.Distributivo,
+        models.Paralelo,
+        models.Asignatura,
+        models.Espacio,
+        models.Docente,
+    ]
+
+    resumen = {}
+    for modelo in orden:
+        resumen[modelo.__tablename__] = db.query(modelo).delete()
+
+    db.commit()
+    return {"mensaje": "datos eliminados", "detalle": resumen}
+
+
 @router.post("/disponibilidad", response_model=schemas.ResumenImportacion)
 def importar_disponibilidad(datos: list[schemas.DisponibilidadIn], db: Session = Depends(get_db)):
     filas = []

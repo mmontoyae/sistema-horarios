@@ -15,7 +15,11 @@ import { environment } from '../environments/environment';
 
     <nav class="barra" [class.barra-solida]="!esInicio || menuAbierto" [class.barra-con-cinta]="modoDemo">
       <a routerLink="/inicio" class="logo" (click)="cerrarMenu()">
-        HORARIOS<span class="logo-acento">UPSE</span>
+        <img src="assets/escudo-upse.webp" alt="Universidad Estatal Peninsula de Santa Elena">
+        <span class="logo-texto">
+          <strong>UPSE</strong>
+          <small>Sistema de Horarios</small>
+        </span>
       </a>
 
       <div class="enlaces">
@@ -53,8 +57,8 @@ import { environment } from '../environments/environment';
       position: fixed;
       top: 0; left: 0; right: 0;
       z-index: 60;
-      background: hsl(var(--primary));
-      color: hsl(var(--primary-foreground));
+      background: hsl(var(--accent));
+      color: hsl(var(--accent-foreground));
       text-align: center;
       padding: 6px 14px;
       font-size: 0.66rem;
@@ -78,23 +82,64 @@ import { environment } from '../environments/environment';
     }
 
     .barra-solida {
-      background: hsl(var(--hero-bg) / 0.85);
+      background: hsl(0 0% 100% / 0.88);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border-bottom-color: hsl(var(--border));
     }
 
     .logo {
-      font-size: 1.05rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      color: hsl(var(--foreground));
+      display: flex;
+      align-items: center;
+      gap: 12px;
       text-decoration: none;
     }
 
-    .logo-acento {
+    .logo img {
+      height: 38px;
+      width: auto;
+      display: block;
+    }
+
+    /* bloque de marca: nombre de la universidad y del modulo */
+    .logo-texto {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      padding-left: 13px;
+      position: relative;
+    }
+
+    .logo-texto::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1px;
+      height: 26px;
+      background: hsl(var(--border));
+    }
+
+    .logo-texto strong {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
       color: hsl(var(--primary));
-      margin-left: 5px;
+      line-height: 1;
+    }
+
+    .logo-texto small {
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: hsl(var(--muted-foreground));
+      line-height: 1;
+    }
+
+    @media (max-width: 480px) {
+      .logo img { height: 32px; }
+      .logo-texto small { display: none; }
     }
 
     .enlaces {
@@ -123,7 +168,7 @@ import { environment } from '../environments/environment';
     .boton-barra {
       display: none;
       background: hsl(var(--nav-button));
-      color: hsl(var(--foreground));
+      color: hsl(var(--primary-foreground));
       text-decoration: none;
       padding: 11px 24px;
       border-radius: var(--radius);
@@ -133,7 +178,7 @@ import { environment } from '../environments/environment';
       transition: background 0.2s ease, transform 0.1s ease;
     }
 
-    .boton-barra:hover { background: hsl(0 0% 26%); }
+    .boton-barra:hover { background: hsl(207 100% 20%); }
     .boton-barra:active { transform: scale(0.97); }
 
     .boton-menu {
@@ -169,7 +214,8 @@ import { environment } from '../environments/environment';
       right: 0;
       height: 100vh;
       width: min(78vw, 300px);
-      background: hsl(var(--hero-bg));
+      background: hsl(var(--background));
+      box-shadow: -8px 0 30px hsl(207 30% 20% / 0.1);
       border-left: 1px solid hsl(var(--border));
       z-index: 55;
       display: flex;

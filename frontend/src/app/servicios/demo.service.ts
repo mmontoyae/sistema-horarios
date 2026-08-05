@@ -19,6 +19,7 @@ export class DemoService {
   };
 
   private historial: Conflicto[] = [];
+  private ultimoId = 0;
 
   // hoja del excel -> clave interna
   private mapa: { [endpoint: string]: string } = {
@@ -47,7 +48,10 @@ export class DemoService {
     this.historial = [...this.historial, ...resultado.conflictos];
 
     if (resultado.estado === 'VALIDO' && propuesta.confirmar) {
-      this.datos.horarios = [...this.datos.horarios, { ...propuesta }];
+      this.datos.horarios = [
+        ...this.datos.horarios,
+        { ...propuesta, horario_id: ++this.ultimoId }
+      ];
     }
 
     return of(resultado).pipe(delay(220));
@@ -63,5 +67,35 @@ export class DemoService {
 
   obtenerCatalogos(): Observable<any> {
     return of(this.datos);
+  }
+
+  // ---------- borrado ----------
+
+  borrarTodo(): Observable<any> {
+    this.datos = {
+      docentes: [], espacios: [], asignaturas: [],
+      paralelos: [], distributivo: [], disponibilidades: [], horarios: []
+    };
+    this.historial = [];
+    return of({ mensaje: 'datos eliminados' }).pipe(delay(180));
+  }
+
+  vaciarHorario(): Observable<any> {
+    const eliminados = this.datos.horarios.length;
+    this.datos = { ...this.datos, horarios: [] };
+    return of({ mensaje: 'horario vaciado', eliminados }).pipe(delay(180));
+  }
+
+  eliminarBloque(horarioId: number): Observable<any> {
+    this.datos = {
+      ...this.datos,
+      horarios: this.datos.horarios.filter((h: any) => h.horario_id !== horarioId)
+    };
+    return of({ mensaje: 'bloque eliminado' }).pipe(delay(180));
+  }
+
+  limpiarConflictos(): Observable<any> {
+    this.historial = [];
+    return of({ mensaje: 'historial limpio' }).pipe(delay(180));
   }
 }

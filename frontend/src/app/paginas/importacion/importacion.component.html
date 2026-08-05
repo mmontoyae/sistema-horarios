@@ -86,6 +86,31 @@
     Todas las hojas fueron procesadas correctamente. Ya puedes armar una propuesta de horario.
   </div>
 
+  <div class="mensaje-ok" *ngIf="mensajeBorrado">{{ mensajeBorrado }}</div>
+
+  <!-- borrado de los datos ya guardados en el servidor -->
+  <section class="tarjeta zona-peligro">
+    <h3 class="tarjeta-titulo">Borrar datos guardados</h3>
+    <p class="texto-tenue">
+      Elimina de la base todos los insumos importados junto con el horario confirmado.
+      Es util para empezar una carga desde cero. Esta accion no se puede deshacer.
+    </p>
+
+    <div class="acciones-peligro" *ngIf="!confirmandoBorrado">
+      <button class="secundario" (click)="pedirConfirmacion()">Borrar todos los datos</button>
+    </div>
+
+    <div class="confirmacion" *ngIf="confirmandoBorrado">
+      <span>¿Seguro que quieres borrar todos los insumos y el horario?</span>
+      <div class="acciones-peligro">
+        <button class="peligro" (click)="borrarTodo()" [disabled]="borrando">
+          {{ borrando ? 'Borrando...' : 'Si, borrar todo' }}
+        </button>
+        <button class="secundario" (click)="cancelarBorrado()" [disabled]="borrando">Cancelar</button>
+      </div>
+    </div>
+  </section>
+
   <!-- hojas detectadas -->
   <section *ngFor="let hoja of hojas; let i = index"
            class="tarjeta hoja animar-subida" [style.animation-delay]="(0.1 + i * 0.06) + 's'">

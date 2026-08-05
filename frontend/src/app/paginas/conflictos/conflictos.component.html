@@ -8,6 +8,7 @@
   </header>
 
   <div class="mensaje-error" *ngIf="mensajeError">{{ mensajeError }}</div>
+  <div class="mensaje-ok" *ngIf="mensajeAccion">{{ mensajeAccion }}</div>
 
   <section class="indicadores animar-subida" style="animation-delay: 0.1s">
     <div class="indicador">
@@ -45,6 +46,8 @@
                    class="bloque"
                    [class.bloque-conflicto]="tieneConflicto(b)"
                    [class.bloque-continuacion]="!esInicio(b, hora)">
+                <button *ngIf="esInicio(b, hora)" class="quitar-bloque" title="Quitar del horario"
+                        (click)="eliminarBloque(b)" [disabled]="procesando">✕</button>
                 <span class="bloque-codigo">{{ b.asignatura_id }} / {{ b.paralelo_id }}</span>
                 <span class="bloque-detalle">{{ b.docente_id }} · {{ b.espacio_id }}</span>
                 <span class="bloque-horas">{{ b.hora_inicio }} – {{ b.hora_fin }}</span>
@@ -58,10 +61,27 @@
     <p class="texto-tenue" *ngIf="horario.length === 0" style="margin-top: 14px">
       Todavia no hay bloques confirmados. Valida una propuesta marcando la opcion de confirmar.
     </p>
+
+    <div class="pie-matriz" *ngIf="horario.length > 0">
+      <span class="texto-tenue">Pasa el cursor sobre un bloque para quitarlo del horario.</span>
+
+      <button class="secundario" *ngIf="!confirmandoVaciado"
+              (click)="confirmandoVaciado = true">Vaciar horario</button>
+
+      <span class="confirmacion-linea" *ngIf="confirmandoVaciado">
+        ¿Eliminar los {{ totalBloques }} bloques?
+        <button class="peligro" (click)="vaciarHorario()" [disabled]="procesando">Si, vaciar</button>
+        <button class="secundario" (click)="confirmandoVaciado = false" [disabled]="procesando">Cancelar</button>
+      </span>
+    </div>
   </section>
 
   <section class="tarjeta animar-subida" style="animation-delay: 0.22s">
-    <h3 class="tarjeta-titulo">Conflictos de la sesion</h3>
+    <div class="cabecera-conflictos">
+      <h3 class="tarjeta-titulo">Conflictos de la sesion</h3>
+      <button class="secundario" *ngIf="conflictos.length > 0"
+              (click)="limpiarConflictos()" [disabled]="procesando">Limpiar registro</button>
+    </div>
 
     <div class="contenedor-tabla" *ngIf="conflictos.length > 0">
       <table>

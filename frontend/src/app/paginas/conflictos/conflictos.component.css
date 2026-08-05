@@ -47,7 +47,7 @@
   font-size: 0.7rem;
   font-weight: 600;
   color: hsl(var(--muted-foreground));
-  background: hsl(var(--muted) / 0.4);
+  background: hsl(var(--muted));
   text-align: center;
 }
 
@@ -57,6 +57,7 @@
 }
 
 .bloque {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 1px;
@@ -64,23 +65,23 @@
   margin-bottom: 4px;
   border-radius: 4px;
   border-left: 3px solid hsl(var(--primary));
-  background: hsl(var(--primary) / 0.12);
+  background: hsl(var(--primary) / 0.07);
   transition: background 0.2s ease, transform 0.15s ease;
   cursor: default;
 }
 
 .bloque:hover {
-  background: hsl(var(--primary) / 0.2);
+  background: hsl(var(--primary) / 0.13);
   transform: translateX(1px);
 }
 
 .bloque-conflicto {
   border-left-color: hsl(var(--destructive));
-  background: hsl(var(--destructive) / 0.14);
+  background: hsl(var(--destructive) / 0.09);
   animation: pulso-borde 2s ease-in-out infinite;
 }
 
-.bloque-conflicto:hover { background: hsl(var(--destructive) / 0.22); }
+.bloque-conflicto:hover { background: hsl(var(--destructive) / 0.16); }
 
 .bloque-continuacion { opacity: 0.55; }
 
@@ -104,3 +105,57 @@
 }
 
 .bloque-conflicto .bloque-horas { color: hsl(var(--destructive)); }
+
+/* boton para quitar un bloque: aparece al pasar el cursor */
+.quitar-bloque {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  background: hsl(var(--destructive) / 0.85);
+  color: hsl(0 0% 100%);
+  font-size: 0.6rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.bloque:hover .quitar-bloque { opacity: 1; }
+.quitar-bloque:hover { background: hsl(var(--destructive)); filter: none; }
+
+/* ---------- pie de la matriz y cabecera de conflictos ---------- */
+
+.pie-matriz {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.confirmacion-linea {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: hsl(var(--destructive));
+}
+
+.cabecera-conflictos {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.cabecera-conflictos .tarjeta-titulo { margin-bottom: 0; }
