@@ -22,7 +22,7 @@
         <select [(ngModel)]="propuesta.asignatura_id">
           <option value="">Seleccione</option>
           <option *ngFor="let a of catalogos.asignaturas" [value]="a.asignatura_id">
-            {{ a.asignatura_id }} · {{ a.nombre_asignatura }}
+            {{ a.nombre_asignatura }}
           </option>
         </select>
       </div>
@@ -42,7 +42,7 @@
         <select [(ngModel)]="propuesta.docente_id">
           <option value="">Seleccione</option>
           <option *ngFor="let d of catalogos.docentes" [value]="d.docente_id">
-            {{ d.docente_id }} · {{ d.nombres }} {{ d.apellidos }}
+            {{ d.nombres }} {{ d.apellidos }}
           </option>
         </select>
       </div>
@@ -52,7 +52,7 @@
         <select [(ngModel)]="propuesta.espacio_id">
           <option value="">Seleccione</option>
           <option *ngFor="let e of catalogos.espacios" [value]="e.espacio_id">
-            {{ e.espacio_id }} · {{ e.tipo_espacio }} · cap. {{ e.capacidad }}
+            {{ e.nombre_espacio || e.espacio_id }} · {{ e.tipo_espacio }} · cap. {{ e.capacidad }}
           </option>
         </select>
       </div>

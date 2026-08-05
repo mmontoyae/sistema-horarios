@@ -45,11 +45,13 @@
               <div *ngFor="let b of bloquesEn(dia, hora)"
                    class="bloque"
                    [class.bloque-conflicto]="tieneConflicto(b)"
-                   [class.bloque-continuacion]="!esInicio(b, hora)">
+                   [class.bloque-continuacion]="!esInicio(b, hora)"
+                   [title]="nombreAsignatura(b.asignatura_id) + ' · ' + nombreDocente(b.docente_id) + ' · ' + nombreEspacio(b.espacio_id) + ' · ' + b.paralelo_id">
                 <button *ngIf="esInicio(b, hora)" class="quitar-bloque" title="Quitar del horario"
                         (click)="eliminarBloque(b)" [disabled]="procesando">✕</button>
-                <span class="bloque-codigo">{{ b.asignatura_id }} / {{ b.paralelo_id }}</span>
-                <span class="bloque-detalle">{{ b.docente_id }} · {{ b.espacio_id }}</span>
+                <span class="bloque-codigo">{{ nombreAsignatura(b.asignatura_id) }}</span>
+                <span class="bloque-detalle">{{ nombreDocente(b.docente_id) }}</span>
+                <span class="bloque-detalle">{{ nombreEspacio(b.espacio_id) }} · {{ b.paralelo_id }}</span>
                 <span class="bloque-horas">{{ b.hora_inicio }} – {{ b.hora_fin }}</span>
               </div>
             </td>

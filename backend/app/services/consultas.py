@@ -29,7 +29,8 @@ def cargar_datos(db: Session) -> dict:
             for d in docentes
         ],
         "espacios": [
-            {"espacio_id": e.espacio_id, "tipo_espacio": e.tipo_espacio, "capacidad": e.capacidad}
+            {"espacio_id": e.espacio_id, "tipo_espacio": e.tipo_espacio, "capacidad": e.capacidad,
+             "nombre_espacio": e.nombre_espacio, "codigo_espacio": e.codigo_espacio}
             for e in espacios
         ],
         "asignaturas": [

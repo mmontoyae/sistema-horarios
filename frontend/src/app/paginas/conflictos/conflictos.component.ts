@@ -20,6 +20,11 @@ export class ConflictosComponent implements OnInit {
   cargando = true;
   mensajeError = '';
 
+  // diccionarios de codigo -> nombre, para mostrar texto legible
+  private nombresAsignatura: { [id: string]: string } = {};
+  private nombresDocente: { [id: string]: string } = {};
+  private nombresEspacio: { [id: string]: string } = {};
+
   constructor(private api: ApiService) {}
 
   ngOnInit() {
@@ -38,6 +43,30 @@ export class ConflictosComponent implements OnInit {
       next: datos => this.conflictos = datos,
       error: () => {}
     });
+
+    // los catalogos permiten traducir los codigos a nombres reales
+    this.api.obtenerCatalogos().subscribe({
+      next: c => {
+        (c.asignaturas ?? []).forEach((a: any) => this.nombresAsignatura[a.asignatura_id] = a.nombre_asignatura);
+        (c.docentes ?? []).forEach((d: any) => this.nombresDocente[d.docente_id] = `${d.nombres} ${d.apellidos}`);
+        (c.espacios ?? []).forEach((e: any) => this.nombresEspacio[e.espacio_id] = e.nombre_espacio ?? e.espacio_id);
+      },
+      error: () => {}
+    });
+  }
+
+  // ---------- traduccion de codigos ----------
+
+  nombreAsignatura(id: string): string {
+    return this.nombresAsignatura[id] || id;
+  }
+
+  nombreDocente(id: string): string {
+    return this.nombresDocente[id] || id;
+  }
+
+  nombreEspacio(id: string): string {
+    return this.nombresEspacio[id] || id;
   }
 
   /** bloques confirmados que ocupan la celda dia/hora */
@@ -51,10 +80,14 @@ export class ConflictosComponent implements OnInit {
     );
   }
 
-  /** un bloque se marca si aparece referenciado en algun conflicto */
+  /**
+   * Un bloque se marca solo si el conflicto corresponde exactamente a esa
+   * franja. Antes se comparaba sin las horas, de modo que un intento fallido
+   * en otro horario del mismo dia teñia de rojo al bloque que si era valido.
+   */
   tieneConflicto(bloque: any): boolean {
-    const texto = `${bloque.asignatura_id}/${bloque.paralelo_id} ${bloque.dia_semana}`;
-    return this.conflictos.some(c => c.bloque.startsWith(texto));
+    const texto = `${bloque.asignatura_id}/${bloque.paralelo_id} ${bloque.dia_semana} ${bloque.hora_inicio}-${bloque.hora_fin}`;
+    return this.conflictos.some(c => c.bloque === texto);
   }
 
   /** true cuando el bloque empieza en esa franja (para no repetir el detalle) */

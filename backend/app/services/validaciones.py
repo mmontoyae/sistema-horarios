@@ -28,6 +28,24 @@ def _bloque_texto(propuesta: dict) -> str:
     return f"{propuesta['asignatura_id']}/{propuesta['paralelo_id']} {propuesta['dia_semana']} {propuesta['hora_inicio']}-{propuesta['hora_fin']}"
 
 
+def _nombre_docente(docente_id: str, docentes: list[dict]) -> str:
+    """Nombre completo del docente; si no se conoce, se devuelve el codigo."""
+    d = next((x for x in docentes if x["docente_id"] == docente_id), None)
+    if d and d.get("nombres"):
+        return f"{d['nombres']} {d.get('apellidos', '')}".strip()
+    return docente_id
+
+
+def _nombre_asignatura(asignatura_id: str, asignaturas: list[dict]) -> str:
+    a = next((x for x in asignaturas if x["asignatura_id"] == asignatura_id), None)
+    return a.get("nombre_asignatura", asignatura_id) if a else asignatura_id
+
+
+def _nombre_espacio(espacio_id: str, espacios: list[dict]) -> str:
+    e = next((x for x in espacios if x["espacio_id"] == espacio_id), None)
+    return e.get("nombre_espacio", espacio_id) if e else espacio_id
+
+
 def _conflicto(codigo: str, detalle: str, propuesta: dict) -> dict:
     return {"codigo": codigo, "detalle": detalle, "bloque": _bloque_texto(propuesta)}
 
@@ -53,7 +71,7 @@ def validar_distributivo(propuesta: dict, distributivo: list[dict]) -> list[dict
     )]
 
 
-def validar_disponibilidad_docente(propuesta: dict, disponibilidades: list[dict]) -> list[dict]:
+def validar_disponibilidad_docente(propuesta: dict, disponibilidades: list[dict], docentes: list[dict] | None = None) -> list[dict]:
     franjas = [
         d for d in disponibilidades
         if d["docente_id"] == propuesta["docente_id"]
@@ -67,41 +85,44 @@ def validar_disponibilidad_docente(propuesta: dict, disponibilidades: list[dict]
     )
     if cubierto:
         return []
+    quien = _nombre_docente(propuesta["docente_id"], docentes or [])
     return [_conflicto(
         "FUERA_DISPONIBILIDAD",
-        f"El docente {propuesta['docente_id']} no tiene disponibilidad en esa franja",
+        f"El docente {quien} no tiene disponibilidad en esa franja",
         propuesta,
     )]
 
 
-def validar_docente_ocupado(propuesta: dict, horarios: list[dict]) -> list[dict]:
+def validar_docente_ocupado(propuesta: dict, horarios: list[dict], docentes: list[dict] | None = None, asignaturas: list[dict] | None = None) -> list[dict]:
     ocupado = [
         h for h in horarios
         if h["docente_id"] == propuesta["docente_id"]
         and h["dia_semana"] == propuesta["dia_semana"]
         and hay_traslape(propuesta["hora_inicio"], propuesta["hora_fin"], h["hora_inicio"], h["hora_fin"])
     ]
+    quien = _nombre_docente(propuesta["docente_id"], docentes or [])
     return [
         _conflicto(
             "DOCENTE_OCUPADO",
-            f"El docente {propuesta['docente_id']} ya dicta {h['asignatura_id']} en esa franja",
+            f"El docente {quien} ya dicta {_nombre_asignatura(h['asignatura_id'], asignaturas or [])} en esa franja",
             propuesta,
         )
         for h in ocupado
     ]
 
 
-def validar_espacio_ocupado(propuesta: dict, horarios: list[dict]) -> list[dict]:
+def validar_espacio_ocupado(propuesta: dict, horarios: list[dict], espacios: list[dict] | None = None, asignaturas: list[dict] | None = None) -> list[dict]:
     ocupado = [
         h for h in horarios
         if h["espacio_id"] == propuesta["espacio_id"]
         and h["dia_semana"] == propuesta["dia_semana"]
         and hay_traslape(propuesta["hora_inicio"], propuesta["hora_fin"], h["hora_inicio"], h["hora_fin"])
     ]
+    donde = _nombre_espacio(propuesta["espacio_id"], espacios or [])
     return [
         _conflicto(
             "ESPACIO_OCUPADO",
-            f"El espacio {propuesta['espacio_id']} ya esta ocupado por {h['asignatura_id']} en esa franja",
+            f"El espacio {donde} ya esta ocupado por {_nombre_asignatura(h['asignatura_id'], asignaturas or [])} en esa franja",
             propuesta,
         )
         for h in ocupado
@@ -120,7 +141,8 @@ def validar_espacio_compatible(propuesta: dict, asignaturas: list[dict], espacio
         return []
     return [_conflicto(
         "ESPACIO_INCOMPATIBLE",
-        f"La asignatura requiere {requerido} y el espacio es {espacio['tipo_espacio']}",
+        f"{asignatura.get('nombre_asignatura', propuesta['asignatura_id'])} requiere {requerido} "
+        f"y {espacio.get('nombre_espacio', propuesta['espacio_id'])} es {espacio['tipo_espacio']}",
         propuesta,
     )]
 
@@ -140,9 +162,10 @@ def validar_carga_horaria(propuesta: dict, horarios: list[dict], docentes: list[
 
     if horas_actuales + horas_nuevas <= maximo:
         return []
+    quien = _nombre_docente(propuesta["docente_id"], docentes)
     return [_conflicto(
         "EXCESO_CARGA",
-        f"Con este bloque el docente llegaria a {horas_actuales + horas_nuevas:.1f} horas y su maximo es {maximo}",
+        f"Con este bloque {quien} llegaria a {horas_actuales + horas_nuevas:.1f} horas y su maximo es {maximo}",
         propuesta,
     )]
 
@@ -158,7 +181,8 @@ def validar_capacidad(propuesta: dict, paralelos: list[dict], espacios: list[dic
         return []
     return [_conflicto(
         "CAPACIDAD_INSUFICIENTE",
-        f"El paralelo tiene {paralelo['numero_estudiantes']} estudiantes y el espacio soporta {espacio['capacidad']}",
+        f"El paralelo tiene {paralelo['numero_estudiantes']} estudiantes y "
+        f"{espacio.get('nombre_espacio', propuesta['espacio_id'])} soporta {espacio['capacidad']}",
         propuesta,
     )]
 
@@ -176,9 +200,9 @@ def validar_propuesta(propuesta: dict, datos: dict) -> dict:
     """
     validaciones = [
         lambda: validar_distributivo(propuesta, datos["distributivo"]),
-        lambda: validar_disponibilidad_docente(propuesta, datos["disponibilidades"]),
-        lambda: validar_docente_ocupado(propuesta, datos["horarios"]),
-        lambda: validar_espacio_ocupado(propuesta, datos["horarios"]),
+        lambda: validar_disponibilidad_docente(propuesta, datos["disponibilidades"], datos["docentes"]),
+        lambda: validar_docente_ocupado(propuesta, datos["horarios"], datos["docentes"], datos["asignaturas"]),
+        lambda: validar_espacio_ocupado(propuesta, datos["horarios"], datos["espacios"], datos["asignaturas"]),
         lambda: validar_espacio_compatible(propuesta, datos["asignaturas"], datos["espacios"]),
         lambda: validar_carga_horaria(propuesta, datos["horarios"], datos["docentes"]),
         lambda: validar_capacidad(propuesta, datos["paralelos"], datos["espacios"]),

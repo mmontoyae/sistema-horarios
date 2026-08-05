@@ -89,12 +89,15 @@
   font-size: 0.7rem;
   font-weight: 600;
   color: hsl(var(--foreground));
-  white-space: nowrap;
+  line-height: 1.25;
 }
 
 .bloque-detalle {
-  font-size: 0.63rem;
+  font-size: 0.62rem;
   color: hsl(var(--muted-foreground));
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
