@@ -35,12 +35,15 @@ def cargar_datos(db: Session) -> dict:
         ],
         "asignaturas": [
             {"asignatura_id": a.asignatura_id, "tipo_espacio_requerido": a.tipo_espacio_requerido,
-             "modalidad": a.modalidad, "nombre_asignatura": a.nombre_asignatura}
+             "modalidad": a.modalidad, "nombre_asignatura": a.nombre_asignatura,
+             # el generador necesita saber cuantas horas repartir en la semana
+             "horas_semanales": a.horas_semanales, "requiere_laboratorio": a.requiere_laboratorio}
             for a in asignaturas
         ],
         "paralelos": [
             {"paralelo_id": p.paralelo_id, "asignatura_id": p.asignatura_id,
-             "numero_estudiantes": p.numero_estudiantes}
+             "numero_estudiantes": p.numero_estudiantes,
+             "codigo_paralelo": p.codigo_paralelo, "jornada": p.jornada}
             for p in paralelos
         ],
         "distributivo": [
