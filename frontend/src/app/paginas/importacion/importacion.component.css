@@ -254,3 +254,31 @@
   max-height: 420px;
   overflow-y: auto;
 }
+
+/* ---------- archivos grandes ---------- */
+
+.aviso-tanda {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 4px;
+  background: hsl(var(--secondary));
+}
+
+.barra-progreso {
+  height: 4px;
+  margin-top: 14px;
+  border-radius: 999px;
+  background: hsl(var(--secondary));
+  overflow: hidden;
+}
+
+.barra-progreso-relleno {
+  height: 100%;
+  background: hsl(var(--accent));
+  transition: width 0.3s ease;
+}

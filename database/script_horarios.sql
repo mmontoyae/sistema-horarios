@@ -124,6 +124,22 @@ CREATE TABLE dbo.horario (
 GO
 
 -- =============================================================
+-- 1.1 INDICES
+--
+-- Las funciones de validacion filtran una y otra vez por docente, espacio
+-- y dia. Sin indices, cada consulta recorre la tabla completa y el tiempo
+-- crece de forma lineal con el volumen de datos.
+-- =============================================================
+
+CREATE INDEX ix_horario_docente_dia ON dbo.horario (docente_id, dia_semana) INCLUDE (hora_inicio, hora_fin);
+CREATE INDEX ix_horario_espacio_dia ON dbo.horario (espacio_id, dia_semana) INCLUDE (hora_inicio, hora_fin);
+CREATE INDEX ix_horario_paralelo ON dbo.horario (paralelo_id);
+CREATE INDEX ix_disponibilidad_docente_dia ON dbo.disponibilidad_docente (docente_id, dia_semana) INCLUDE (hora_inicio, hora_fin, disponible);
+CREATE INDEX ix_distributivo_combinacion ON dbo.distributivo (docente_id, asignatura_id, paralelo_id);
+CREATE INDEX ix_paralelo_asignatura ON dbo.paralelo (asignatura_id);
+GO
+
+-- =============================================================
 -- 2. FUNCIONES DE VALIDACION
 -- =============================================================
 

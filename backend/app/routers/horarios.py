@@ -1,3 +1,5 @@
+from collections import deque
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -9,8 +11,11 @@ from app.services import validaciones, consultas
 
 router = APIRouter(prefix="/horarios", tags=["Horarios"])
 
-# registro en memoria de las validaciones realizadas en la sesion
-historial_conflictos: list[dict] = []
+# Registro en memoria de las validaciones realizadas.
+# Se usa una cola con tope: sin limite, cada validacion iria agrandando la
+# lista hasta agotar la memoria del proceso en una sesion larga.
+MAX_CONFLICTOS = 500
+historial_conflictos: deque = deque(maxlen=MAX_CONFLICTOS)
 
 
 @router.post("/validar", response_model=schemas.ResultadoValidacion)
@@ -47,7 +52,7 @@ def validar_propuesta(propuesta: schemas.PropuestaHorario, db: Session = Depends
 
 @router.get("/conflictos", response_model=list[schemas.Conflicto])
 def listar_conflictos():
-    return historial_conflictos
+    return list(historial_conflictos)
 
 
 @router.delete("/conflictos")

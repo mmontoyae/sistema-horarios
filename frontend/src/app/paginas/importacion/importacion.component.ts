@@ -12,6 +12,8 @@ interface EstadoHoja {
   resumen?: ResumenImportacion;
   enviando: boolean;
   abierta: boolean;
+  progreso: number;      // porcentaje enviado, para archivos grandes
+  filasVisibles: number; // cuantas filas se dibujan en la vista previa
 }
 
 @Component({
@@ -62,6 +64,15 @@ export class ImportacionComponent {
   // orden de envio por las claves foraneas
   ordenEnvio = ['docentes', 'espacios', 'asignaturas', 'paralelos', 'distributivo', 'disponibilidad_docente'];
 
+  /**
+   * Cuantas filas se dibujan de entrada en la vista previa.
+   *
+   * Cada fila crea un campo editable por columna. Con miles de registros el
+   * navegador tendria que dibujar decenas de miles de elementos y se quedaria
+   * bloqueado, asi que se muestran por tandas.
+   */
+  static readonly FILAS_POR_TANDA = 50;
+
   constructor(private excel: ExcelService, private api: ApiService) {}
 
   get modoDemo(): boolean {
@@ -79,7 +90,9 @@ export class ImportacionComponent {
         filas: DATOS_EJEMPLO[nombre],
         errores: [],
         enviando: false,
-        abierta: indice === 0
+        abierta: indice === 0,
+        progreso: 0,
+        filasVisibles: ImportacionComponent.FILAS_POR_TANDA
       }));
   }
 
@@ -159,7 +172,9 @@ export class ImportacionComponent {
           filas: contenido[nombre],
           errores: this.excel.validarColumnas(contenido[nombre], this.configuracion[nombre].columnas),
           enviando: false,
-          abierta: indice === 0
+          abierta: indice === 0,
+          progreso: 0,
+          filasVisibles: ImportacionComponent.FILAS_POR_TANDA
         }));
 
       if (this.hojas.length === 0) {
@@ -244,16 +259,34 @@ export class ImportacionComponent {
 
   enviarHoja(hoja: EstadoHoja) {
     hoja.enviando = true;
-    this.api.importar(this.configuracion[hoja.nombre].endpoint, hoja.filas).subscribe({
-      next: resumen => {
-        hoja.resumen = resumen;
-        hoja.enviando = false;
+    hoja.progreso = 0;
+
+    this.api.importarPorLotes(this.configuracion[hoja.nombre].endpoint, hoja.filas).subscribe({
+      next: avance => {
+        hoja.progreso = avance.total ? Math.round((avance.enviados / avance.total) * 100) : 100;
+        if (avance.resumen) {
+          hoja.resumen = avance.resumen;
+          hoja.enviando = false;
+        }
       },
       error: err => {
         hoja.errores = [this.textoError(err)];
         hoja.enviando = false;
       }
     });
+  }
+
+  /** Muestra otra tanda de filas en la vista previa. */
+  verMasFilas(hoja: EstadoHoja) {
+    hoja.filasVisibles += ImportacionComponent.FILAS_POR_TANDA * 4;
+  }
+
+  filasMostradas(hoja: EstadoHoja): any[] {
+    return hoja.filas.slice(0, hoja.filasVisibles);
+  }
+
+  get archivoGrande(): boolean {
+    return this.totalRegistros > 1000;
   }
 
   enviarTodo() {
@@ -267,11 +300,15 @@ export class ImportacionComponent {
       }
       const hoja = pendientes[indice];
       hoja.enviando = true;
-      this.api.importar(this.configuracion[hoja.nombre].endpoint, hoja.filas).subscribe({
-        next: resumen => {
-          hoja.resumen = resumen;
-          hoja.enviando = false;
-          enviarSiguiente(indice + 1);
+      hoja.progreso = 0;
+      this.api.importarPorLotes(this.configuracion[hoja.nombre].endpoint, hoja.filas).subscribe({
+        next: avance => {
+          hoja.progreso = avance.total ? Math.round((avance.enviados / avance.total) * 100) : 100;
+          if (avance.resumen) {
+            hoja.resumen = avance.resumen;
+            hoja.enviando = false;
+            enviarSiguiente(indice + 1);
+          }
         },
         error: err => {
           hoja.errores = [this.textoError(err)];

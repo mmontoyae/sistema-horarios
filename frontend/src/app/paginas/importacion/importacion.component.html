@@ -60,6 +60,11 @@
 
   <div class="mensaje-error" *ngIf="mensajeError">{{ mensajeError }}</div>
 
+  <div class="mensaje-aviso" *ngIf="archivoGrande">
+    Archivo grande: {{ totalRegistros }} registros. El envio se hace por lotes de 500
+    para no saturar el servidor, asi que puede tardar un poco.
+  </div>
+
   <!-- resumen y envio -->
   <section class="barra-resumen animar-subida" *ngIf="hojas.length > 0">
     <div class="resumen-datos">
@@ -151,7 +156,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let fila of hoja.filas; let i = index">
+            <tr *ngFor="let fila of filasMostradas(hoja); let i = index">
               <td *ngFor="let col of columnas(hoja)">
                 <input *ngIf="!esBooleano(fila[col])" type="text" class="celda-input"
                        [(ngModel)]="fila[col]" [name]="hoja.nombre + '-' + i + '-' + col">
@@ -167,13 +172,25 @@
         </table>
       </div>
 
+      <div class="aviso-tanda" *ngIf="hoja.filas.length > hoja.filasVisibles">
+        <span class="texto-tenue">
+          Mostrando {{ hoja.filasVisibles }} de {{ hoja.filas.length }} filas.
+          Se limita la vista para que el navegador no se ralentice.
+        </span>
+        <button class="secundario" (click)="verMasFilas(hoja)">Ver mas filas</button>
+      </div>
+
+      <div class="barra-progreso" *ngIf="hoja.enviando">
+        <div class="barra-progreso-relleno" [style.width.%]="hoja.progreso"></div>
+      </div>
+
       <div class="hoja-pie">
         <span class="texto-tenue">
           {{ hoja.filas.length }} filas · puedes editar las celdas o eliminar filas antes de enviar
         </span>
         <button class="secundario" (click)="enviarHoja(hoja)"
                 [disabled]="hoja.errores.length > 0 || hoja.enviando || hoja.filas.length === 0">
-          {{ hoja.enviando ? 'Enviando...' : 'Enviar esta hoja' }}
+          {{ hoja.enviando ? 'Enviando ' + hoja.progreso + '%' : 'Enviar esta hoja' }}
         </button>
       </div>
     </div>
