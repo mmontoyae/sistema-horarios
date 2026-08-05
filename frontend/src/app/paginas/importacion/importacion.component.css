@@ -255,6 +255,50 @@
   overflow-y: auto;
 }
 
+/* ---------- siguiente paso tras importar ---------- */
+
+.panel-siguiente {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  flex-wrap: wrap;
+  border-color: hsl(var(--accent) / 0.4);
+  background: linear-gradient(to right, hsl(var(--accent) / 0.04), transparent 60%);
+}
+
+.panel-siguiente .tarjeta-titulo::before { background: hsl(var(--accent)); }
+
+.acciones-siguiente {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.boton-enlace {
+  display: inline-flex;
+  align-items: center;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  text-decoration: none;
+  padding: 11px 22px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: filter 0.2s ease, transform 0.1s ease;
+}
+
+.boton-enlace:hover { filter: brightness(1.35); }
+.boton-enlace:active { transform: scale(0.97); }
+
+.boton-enlace.secundario {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+}
+
+.boton-enlace.secundario:hover { background: hsl(var(--secondary)); filter: none; }
+
 /* ---------- archivos grandes ---------- */
 
 .aviso-tanda {

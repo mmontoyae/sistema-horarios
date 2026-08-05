@@ -7,7 +7,7 @@ from datetime import datetime
 
 from app.database import get_db
 from app import models, schemas
-from app.services import validaciones, consultas
+from app.services import validaciones, consultas, generador
 
 router = APIRouter(prefix="/horarios", tags=["Horarios"])
 
@@ -48,6 +48,43 @@ def validar_propuesta(propuesta: schemas.PropuestaHorario, db: Session = Depends
         db.commit()
 
     return resultado
+
+
+@router.post("/generar", response_model=schemas.ResultadoGeneracion)
+def generar_automatico(conservar: bool = False, db: Session = Depends(get_db)):
+    """
+    Arma el horario completo a partir del distributivo academico.
+
+    Por cada asignacion busca dia, hora y espacio donde el bloque no incumpla
+    ninguna regla, resolviendo primero las que tienen menos alternativas.
+    Con `conservar=true` respeta los bloques ya registrados y solo agrega los
+    que falten; de lo contrario reemplaza el horario completo.
+    """
+    datos = consultas.cargar_datos(db)
+    resultado = generador.generar_horario(datos, conservar_existente=conservar)
+
+    if not conservar:
+        db.query(models.Horario).delete()
+
+    for bloque in resultado["asignados"]:
+        db.add(models.Horario(
+            asignatura_id=bloque["asignatura_id"],
+            paralelo_id=bloque["paralelo_id"],
+            docente_id=bloque["docente_id"],
+            espacio_id=bloque["espacio_id"],
+            dia_semana=bloque["dia_semana"],
+            hora_inicio=datetime.strptime(bloque["hora_inicio"], "%H:%M").time(),
+            hora_fin=datetime.strptime(bloque["hora_fin"], "%H:%M").time(),
+            modalidad=bloque["modalidad"],
+        ))
+
+    db.commit()
+
+    return schemas.ResultadoGeneracion(
+        total_asignados=resultado["total_asignados"],
+        total_sin_asignar=resultado["total_sin_asignar"],
+        sin_asignar=resultado["sin_asignar"],
+    )
 
 
 @router.get("/conflictos", response_model=list[schemas.Conflicto])

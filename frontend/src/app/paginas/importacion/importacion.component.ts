@@ -1,6 +1,7 @@
 import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ExcelService } from '../../servicios/excel.service';
 import { ApiService, ResumenImportacion } from '../../servicios/api.service';
 import { DATOS_EJEMPLO } from '../../servicios/datos-ejemplo';
@@ -19,7 +20,7 @@ interface EstadoHoja {
 @Component({
   selector: 'app-importacion',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './importacion.component.html',
   styleUrls: ['./importacion.component.css']
 })

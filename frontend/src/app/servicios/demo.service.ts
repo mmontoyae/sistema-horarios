@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { validarPropuesta, ResultadoValidacion, Conflicto } from './validaciones';
+import { generarHorario } from './generador';
 
 /**
  * Backend simulado para el modo demostracion (publicacion en GitHub Pages).
@@ -97,6 +98,21 @@ export class DemoService {
   limpiarConflictos(): Observable<any> {
     this.historial = [];
     return of({ mensaje: 'historial limpio' }).pipe(delay(180));
+  }
+
+  /** Arma el horario completo a partir del distributivo. */
+  generarHorario(conservar: boolean): Observable<any> {
+    const r = generarHorario(this.datos, conservar);
+    const base = conservar ? this.datos.horarios : [];
+    this.datos = {
+      ...this.datos,
+      horarios: [...base, ...r.asignados].map((h, i) => ({ ...h, horario_id: i + 1 }))
+    };
+    return of({
+      total_asignados: r.total_asignados,
+      total_sin_asignar: r.total_sin_asignar,
+      sin_asignar: r.sin_asignar
+    }).pipe(delay(250));
   }
 
   /** Mueve un bloque validando el destino sin contarlo a si mismo. */

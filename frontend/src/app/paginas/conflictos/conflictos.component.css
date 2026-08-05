@@ -1,3 +1,21 @@
+/* ---------- panel de generacion automatica ---------- */
+
+.panel-generar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  border-color: hsl(var(--primary) / 0.3);
+  background: linear-gradient(to right, hsl(var(--primary) / 0.03), transparent 60%);
+}
+
+.generar-texto { flex: 1; min-width: 280px; }
+.generar-texto .tarjeta-titulo { margin-bottom: 8px; }
+.generar-texto .texto-tenue { margin: 0; max-width: 68ch; }
+
+.generar-acciones { flex-shrink: 0; }
+
 .indicadores {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));

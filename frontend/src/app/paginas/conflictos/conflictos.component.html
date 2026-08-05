@@ -25,6 +25,57 @@
     </div>
   </section>
 
+  <!-- generacion automatica -->
+  <section class="tarjeta panel-generar animar-subida" style="animation-delay: 0.13s">
+    <div class="generar-texto">
+      <h3 class="tarjeta-titulo">Generar horario automaticamente</h3>
+      <p class="texto-tenue">
+        El sistema recorre el distributivo academico y busca para cada asignacion un dia,
+        una hora y un espacio que cumplan las siete reglas. Resuelve primero las que tienen
+        menos alternativas e informa de las que no pudo ubicar.
+      </p>
+    </div>
+
+    <div class="generar-acciones" *ngIf="!confirmandoGeneracion">
+      <button (click)="pedirGeneracion()" [disabled]="generando">
+        {{ generando ? 'Generando...' : 'Generar horario' }}
+      </button>
+    </div>
+
+    <div class="confirmacion" *ngIf="confirmandoGeneracion">
+      <span>Ya hay {{ totalBloques }} bloques. Al generar se reemplaza el horario completo.</span>
+      <div class="acciones-peligro">
+        <button (click)="generar()" [disabled]="generando">Generar de nuevo</button>
+        <button class="secundario" (click)="confirmandoGeneracion = false">Cancelar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- asignaciones que no se pudieron colocar -->
+  <section class="tarjeta" *ngIf="sinAsignar.length > 0">
+    <h3 class="tarjeta-titulo">Asignaciones sin ubicar ({{ sinAsignar.length }})</h3>
+    <div class="contenedor-tabla">
+      <table>
+        <thead>
+          <tr>
+            <th>Asignatura</th>
+            <th>Paralelo</th>
+            <th>Docente</th>
+            <th>Motivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of sinAsignar">
+            <td>{{ nombreAsignatura(s.asignatura_id) }}</td>
+            <td class="texto-tenue">{{ s.paralelo_id }}</td>
+            <td>{{ nombreDocente(s.docente_id) }}</td>
+            <td>{{ s.motivo }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
   <p *ngIf="cargando" class="texto-tenue">Cargando horario...</p>
 
   <section class="tarjeta animar-subida" style="animation-delay: 0.16s" *ngIf="!cargando">

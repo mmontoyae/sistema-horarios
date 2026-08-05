@@ -106,3 +106,16 @@ class ResumenImportacion(BaseModel):
     entidad: str
     procesados: int
     errores: list[str]
+
+
+class AsignacionPendiente(BaseModel):
+    asignatura_id: str
+    paralelo_id: str
+    docente_id: str
+    motivo: str
+
+
+class ResultadoGeneracion(BaseModel):
+    total_asignados: int
+    total_sin_asignar: int
+    sin_asignar: list[AsignacionPendiente]

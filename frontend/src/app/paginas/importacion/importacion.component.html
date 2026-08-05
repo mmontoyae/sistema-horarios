@@ -87,9 +87,19 @@
     </button>
   </section>
 
-  <div class="mensaje-ok" *ngIf="todasEnviadas">
-    Todas las hojas fueron procesadas correctamente. Ya puedes armar una propuesta de horario.
-  </div>
+  <section class="tarjeta panel-siguiente animar-subida" *ngIf="todasEnviadas">
+    <div>
+      <h3 class="tarjeta-titulo">Datos cargados</h3>
+      <p class="texto-tenue" style="margin: 0">
+        Ya puedes armar el horario. El sistema puede generarlo completo a partir del
+        distributivo, o puedes construirlo bloque por bloque.
+      </p>
+    </div>
+    <div class="acciones-siguiente">
+      <a routerLink="/conflictos" class="boton-enlace">Generar horario</a>
+      <a routerLink="/horario" class="boton-enlace secundario">Armar a mano</a>
+    </div>
+  </section>
 
   <div class="mensaje-ok" *ngIf="mensajeBorrado">{{ mensajeBorrado }}</div>
 

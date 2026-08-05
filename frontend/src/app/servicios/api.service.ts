@@ -22,6 +22,19 @@ export interface ResumenImportacion {
   errores: string[];
 }
 
+export interface AsignacionPendiente {
+  asignatura_id: string;
+  paralelo_id: string;
+  docente_id: string;
+  motivo: string;
+}
+
+export interface ResultadoGeneracion {
+  total_asignados: number;
+  total_sin_asignar: number;
+  sin_asignar: AsignacionPendiente[];
+}
+
 /**
  * Punto unico de acceso a los datos.
  *
@@ -136,6 +149,13 @@ export class ApiService {
   eliminarBloque(horarioId: number): Observable<any> {
     if (this.modoDemo) return this.demo.eliminarBloque(horarioId);
     return this.http.delete<any>(`${this.urlBase}/horarios/bloque/${horarioId}`);
+  }
+
+  /** Arma el horario completo automaticamente desde el distributivo. */
+  generarHorario(conservar = false): Observable<ResultadoGeneracion> {
+    if (this.modoDemo) return this.demo.generarHorario(conservar);
+    return this.http.post<ResultadoGeneracion>(
+      `${this.urlBase}/horarios/generar?conservar=${conservar}`, {});
   }
 
   /** Reubica un bloque en otro dia u hora, validando el destino. */

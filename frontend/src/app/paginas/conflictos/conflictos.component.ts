@@ -146,6 +146,44 @@ export class ConflictosComponent implements OnInit {
     });
   }
 
+  // ---------- generacion automatica ----------
+
+  generando = false;
+  confirmandoGeneracion = false;
+  sinAsignar: any[] = [];
+
+  pedirGeneracion() {
+    // si el horario esta vacio se genera directamente, sin preguntar
+    if (this.horario.length === 0) {
+      this.generar();
+    } else {
+      this.confirmandoGeneracion = true;
+    }
+  }
+
+  generar() {
+    this.generando = true;
+    this.confirmandoGeneracion = false;
+    this.mensajeError = '';
+    this.mensajeAccion = '';
+    this.sinAsignar = [];
+
+    this.api.generarHorario(false).subscribe({
+      next: r => {
+        this.generando = false;
+        this.sinAsignar = r.sin_asignar;
+        this.mensajeAccion = r.total_sin_asignar === 0
+          ? `Horario generado: ${r.total_asignados} bloques colocados sin ningun conflicto.`
+          : `Horario generado: ${r.total_asignados} bloques colocados. ${r.total_sin_asignar} asignaciones no pudieron ubicarse.`;
+        this.recargar();
+      },
+      error: () => {
+        this.generando = false;
+        this.mensajeError = 'No se pudo generar el horario.';
+      }
+    });
+  }
+
   // ---------- mover bloques arrastrando ----------
 
   bloqueArrastrado: any = null;
