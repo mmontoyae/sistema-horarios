@@ -138,6 +138,13 @@ export class ApiService {
     return this.http.delete<any>(`${this.urlBase}/horarios/bloque/${horarioId}`);
   }
 
+  /** Reubica un bloque en otro dia u hora, validando el destino. */
+  moverBloque(horarioId: number, diaSemana: string, horaInicio: string): Observable<ResultadoValidacion> {
+    const destino = { dia_semana: diaSemana, hora_inicio: horaInicio };
+    if (this.modoDemo) return this.demo.moverBloque(horarioId, destino);
+    return this.http.put<ResultadoValidacion>(`${this.urlBase}/horarios/bloque/${horarioId}/mover`, destino);
+  }
+
   /** Limpia el registro de conflictos de la sesion. */
   limpiarConflictos(): Observable<any> {
     if (this.modoDemo) return this.demo.limpiarConflictos();

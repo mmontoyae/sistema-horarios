@@ -70,6 +70,12 @@ class DisponibilidadIn(BaseModel):
 
 # ---------- propuesta de horario ----------
 
+class MovimientoBloque(BaseModel):
+    """Nueva ubicacion a la que se quiere arrastrar un bloque ya confirmado."""
+    dia_semana: str
+    hora_inicio: str
+
+
 class PropuestaHorario(BaseModel):
     asignatura_id: str
     paralelo_id: str

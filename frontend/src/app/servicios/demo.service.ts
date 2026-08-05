@@ -98,4 +98,42 @@ export class DemoService {
     this.historial = [];
     return of({ mensaje: 'historial limpio' }).pipe(delay(180));
   }
+
+  /** Mueve un bloque validando el destino sin contarlo a si mismo. */
+  moverBloque(horarioId: number, destino: { dia_semana: string; hora_inicio: string }): Observable<any> {
+    const bloque = this.datos.horarios.find((h: any) => h.horario_id === horarioId);
+    if (!bloque) {
+      return of({ estado: 'INVALIDO', total_conflictos: 1, conflictos: [
+        { codigo: 'NO_ENCONTRADO', detalle: 'El bloque ya no existe', bloque: '' }
+      ]});
+    }
+
+    const aMin = (h: string) => { const [a, b] = h.split(':').map(Number); return a * 60 + b; };
+    const duracion = aMin(bloque.hora_fin) - aMin(bloque.hora_inicio);
+    const inicio = aMin(destino.hora_inicio);
+    const fin = inicio + duracion;
+
+    if (fin > 22 * 60) {
+      return of({ estado: 'INVALIDO', total_conflictos: 1, conflictos: [{
+        codigo: 'FUERA_DE_JORNADA',
+        detalle: 'El bloque no cabe en la jornada si se coloca en esa hora',
+        bloque: `${bloque.asignatura_id}/${bloque.paralelo_id} ${destino.dia_semana} ${destino.hora_inicio}`
+      }]}).pipe(delay(150));
+    }
+
+    const horaFin = `${String(Math.floor(fin / 60)).padStart(2, '0')}:${String(fin % 60).padStart(2, '0')}`;
+
+    // el propio bloque no cuenta como ocupacion
+    const otros = this.datos.horarios.filter((h: any) => h.horario_id !== horarioId);
+    const propuesta = { ...bloque, dia_semana: destino.dia_semana, hora_inicio: destino.hora_inicio, hora_fin: horaFin };
+    const resultado = validarPropuesta(propuesta, { ...this.datos, horarios: otros });
+
+    if (resultado.estado === 'VALIDO') {
+      this.datos = { ...this.datos, horarios: [...otros, propuesta] };
+    } else {
+      this.historial = [...this.historial, ...resultado.conflictos];
+    }
+
+    return of(resultado).pipe(delay(180));
+  }
 }

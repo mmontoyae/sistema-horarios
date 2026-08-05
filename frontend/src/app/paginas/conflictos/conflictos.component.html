@@ -41,11 +41,21 @@
         <tbody>
           <tr *ngFor="let hora of horas">
             <td class="col-hora">{{ hora }}</td>
-            <td *ngFor="let dia of dias" class="celda">
+            <td *ngFor="let dia of dias" class="celda"
+                [class.celda-destino]="celdaDestino === dia + '-' + hora"
+                (dragover)="permitirSoltar(dia, hora, $event)"
+                (dragleave)="salirDeCelda(dia, hora)"
+                (drop)="soltarEnCelda(dia, hora, $event)">
               <div *ngFor="let b of bloquesEn(dia, hora)"
                    class="bloque"
                    [class.bloque-conflicto]="tieneConflicto(b)"
                    [class.bloque-continuacion]="!esInicio(b, hora)"
+                   [class.bloque-movible]="esInicio(b, hora)"
+                   [class.bloque-arrastrando]="bloqueArrastrado?.horario_id === b.horario_id"
+                   [class.bloque-rechazado]="bloqueRechazado === b.horario_id"
+                   [attr.draggable]="esInicio(b, hora) ? true : null"
+                   (dragstart)="iniciarArrastre(b, $event)"
+                   (dragend)="terminarArrastre()"
                    [title]="nombreAsignatura(b.asignatura_id) + ' · ' + nombreDocente(b.docente_id) + ' · ' + nombreEspacio(b.espacio_id) + ' · ' + b.paralelo_id">
                 <button *ngIf="esInicio(b, hora)" class="quitar-bloque" title="Quitar del horario"
                         (click)="eliminarBloque(b)" [disabled]="procesando">✕</button>
@@ -65,7 +75,10 @@
     </p>
 
     <div class="pie-matriz" *ngIf="horario.length > 0">
-      <span class="texto-tenue">Pasa el cursor sobre un bloque para quitarlo del horario.</span>
+      <span class="texto-tenue">
+        Arrastra un bloque a otra celda para reprogramarlo; si el destino genera conflicto
+        vuelve a su lugar. Pasa el cursor por encima para quitarlo.
+      </span>
 
       <button class="secundario" *ngIf="!confirmandoVaciado"
               (click)="confirmandoVaciado = true">Vaciar horario</button>

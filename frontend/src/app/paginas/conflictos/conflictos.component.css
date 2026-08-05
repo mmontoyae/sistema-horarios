@@ -54,6 +54,13 @@
 .celda {
   height: 54px;
   padding: 5px;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* celda resaltada mientras se arrastra un bloque encima */
+.celda-destino {
+  background: hsl(var(--accent) / 0.1);
+  box-shadow: inset 0 0 0 2px hsl(var(--accent) / 0.6);
 }
 
 .bloque {
@@ -84,6 +91,35 @@
 .bloque-conflicto:hover { background: hsl(var(--destructive) / 0.16); }
 
 .bloque-continuacion { opacity: 0.55; }
+
+/* ---------- arrastre de bloques ---------- */
+
+.bloque-movible {
+  cursor: grab;
+}
+
+.bloque-movible:active { cursor: grabbing; }
+
+.bloque-arrastrando {
+  opacity: 0.4;
+  transform: scale(0.97);
+}
+
+/* el bloque vuelve a su sitio con una sacudida cuando el destino no es valido */
+.bloque-rechazado {
+  animation: rechazo 0.5s ease;
+  border-left-color: hsl(var(--destructive));
+  background: hsl(var(--destructive) / 0.14);
+}
+
+@keyframes rechazo {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-5px); }
+  30% { transform: translateX(5px); }
+  45% { transform: translateX(-4px); }
+  60% { transform: translateX(4px); }
+  80% { transform: translateX(-2px); }
+}
 
 .bloque-codigo {
   font-size: 0.7rem;

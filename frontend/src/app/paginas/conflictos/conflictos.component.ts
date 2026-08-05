@@ -146,6 +146,69 @@ export class ConflictosComponent implements OnInit {
     });
   }
 
+  // ---------- mover bloques arrastrando ----------
+
+  bloqueArrastrado: any = null;
+  celdaDestino = '';
+  bloqueRechazado: number | null = null;
+
+  iniciarArrastre(bloque: any, evento: DragEvent) {
+    this.bloqueArrastrado = bloque;
+    this.mensajeAccion = '';
+    this.mensajeError = '';
+    evento.dataTransfer?.setData('text/plain', String(bloque.horario_id));
+    if (evento.dataTransfer) evento.dataTransfer.effectAllowed = 'move';
+  }
+
+  terminarArrastre() {
+    this.bloqueArrastrado = null;
+    this.celdaDestino = '';
+  }
+
+  permitirSoltar(dia: string, hora: string, evento: DragEvent) {
+    if (!this.bloqueArrastrado) return;
+    evento.preventDefault();
+    this.celdaDestino = `${dia}-${hora}`;
+    if (evento.dataTransfer) evento.dataTransfer.dropEffect = 'move';
+  }
+
+  salirDeCelda(dia: string, hora: string) {
+    if (this.celdaDestino === `${dia}-${hora}`) this.celdaDestino = '';
+  }
+
+  soltarEnCelda(dia: string, hora: string, evento: DragEvent) {
+    evento.preventDefault();
+    const bloque = this.bloqueArrastrado;
+    this.celdaDestino = '';
+    this.bloqueArrastrado = null;
+
+    if (!bloque) return;
+
+    // si se suelta donde ya estaba, no hay nada que hacer
+    if (bloque.dia_semana === dia && bloque.hora_inicio === hora) return;
+
+    this.procesando = true;
+    this.api.moverBloque(bloque.horario_id, dia, hora).subscribe({
+      next: r => {
+        this.procesando = false;
+        if (r.estado === 'VALIDO') {
+          this.mensajeAccion = `${this.nombreAsignatura(bloque.asignatura_id)} se movio a ${dia} ${hora}.`;
+          this.recargar();
+        } else {
+          // el bloque se queda donde estaba y se avisa del motivo
+          this.bloqueRechazado = bloque.horario_id;
+          setTimeout(() => this.bloqueRechazado = null, 1200);
+          this.mensajeError = 'No se pudo mover: ' + r.conflictos.map(c => c.detalle).join(' · ');
+          this.conflictos = [...this.conflictos, ...r.conflictos];
+        }
+      },
+      error: () => {
+        this.procesando = false;
+        this.mensajeError = 'No se pudo mover el bloque.';
+      }
+    });
+  }
+
   limpiarConflictos() {
     this.procesando = true;
     this.api.limpiarConflictos().subscribe({
